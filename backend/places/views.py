@@ -64,7 +64,7 @@ def list_admin_areas_geojson(request):
                 "name_en": area.name_en,
                 "code": area.code,
                 "level": area.level,
-                "level_name": "بلدية" if area.level == 9 else "حي",
+                "level_name": area.level_name,
                 "parent_id": area.parent_id,
                 "parent_name_ar": area.parent.name_ar if area.parent else "",
             },
