@@ -77,7 +77,7 @@ const DAMASCUS_BOUNDS: [[number, number], [number, number]] = [
   [36.37, 33.58],
 ];
 const DEFAULT_CENTER: [number, number] = [36.273, 33.512]; // المركز الجغرافي الشامل لمحافظة دمشق
-const DEFAULT_ZOOM = 11.2; // مستوى التقريب الأولي لكشف دمشق كاملة ببلدياتها الـ 16
+const DEFAULT_ZOOM = 11.2;
 const DAMASCUS_OVERVIEW_CENTER: [number, number] = [36.273, 33.512];
 const DAMASCUS_OVERVIEW_ZOOM = 11.2;
 const THREE_D_VIDEO_URL = "https://youtu.be/LDo_ec-INyQ?si=NyE6a-28GdyKHIvJ";
@@ -130,6 +130,7 @@ export default function MapViewer({
   );
   const [selectedMunicipality, setSelectedMunicipality] =
     useState<AdminAreaProperties | null>(null);
+  const [activeAdminSector, setActiveAdminSector] = useState<AdminAreaProperties | null>(null);
   const [selectedNeighborhood, setSelectedNeighborhood] =
     useState<AdminAreaProperties | null>(null);
   const [hoveredAdminArea, setHoveredAdminArea] = useState<{
@@ -145,6 +146,7 @@ export default function MapViewer({
 
   const [adminFeatures, setAdminFeatures] = useState<any[]>([]);
   const adminGeoJsonRef = useRef<any>(null);
+  const hoveredSectorIdRef = useRef<number | null>(null);
   const hoveredMunIdRef = useRef<number | null>(null);
   const hoveredNeighIdRef = useRef<number | null>(null);
   const selectedMunIdRef = useRef<number | null>(null);
@@ -159,6 +161,7 @@ export default function MapViewer({
     for (const ref of [
       selectedMunIdRef,
       selectedNeighIdRef,
+      hoveredSectorIdRef,
       hoveredMunIdRef,
       hoveredNeighIdRef,
     ]) {
@@ -171,6 +174,7 @@ export default function MapViewer({
       ref.current = null;
     }
     if (map) map.getCanvas().style.cursor = "";
+    setActiveAdminSector(null);
     setSelectedMunicipality(null);
     setSelectedNeighborhood(null);
     setSelectedArea(null);
@@ -941,6 +945,17 @@ export default function MapViewer({
     });
   }, []);
 
+  const selectAdminSector = useCallback((sector: AdminAreaProperties) => {
+    const map = mapInstanceRef.current;
+    const feature = adminGeoJsonRef.current?.features.find((f: any) => f.properties.id === sector.id);
+    const bounds = feature && getFeatureBounds(feature);
+    if (!map || !bounds) return;
+    clearAdminSelection();
+    setActiveAdminSector(sector);
+    const camera = map.cameraForBounds(bounds, { padding: 40, maxZoom: 12.8 });
+    if (camera) map.easeTo({ ...camera, zoom: Math.max(12, camera.zoom), duration: 800 });
+  }, [clearAdminSelection]);
+
   // اختيار بلدية معينة (Level 9): عزل حدودها، إظهار أحيائها التابعة، والتقريب الذكي عليها
   const handleSelectMunicipality = useCallback(
     (props: AdminAreaProperties, feature?: any) => {
@@ -988,13 +1003,13 @@ export default function MapViewer({
         if (bounds) {
           const isDesktop =
             typeof window !== "undefined" && window.innerWidth >= 640;
-          map.fitBounds(bounds, {
+          const camera = map.cameraForBounds(bounds, {
             padding: isDesktop
               ? { top: 90, bottom: 90, left: 360, right: 90 }
               : { top: 80, bottom: 180, left: 24, right: 24 },
-            duration: 1200,
-            maxZoom: 12.4,
+            maxZoom: 13.8,
           });
+          if (camera) map.easeTo({ ...camera, zoom: Math.max(13, camera.zoom), duration: 1200 });
         }
       }
     },
@@ -1174,12 +1189,33 @@ export default function MapViewer({
             promoteId: "id",
           });
 
+          map.addLayer({
+            id: "admin-sectors-fill", type: "fill", source: "admin-boundaries",
+            maxzoom: 12, filter: ["==", ["get", "level"], 8],
+            paint: {
+              "fill-color": ["case", ["boolean", ["feature-state", "hover"], false], "#c8a76a", "#064239"],
+              "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.28, 0.11],
+            },
+          });
+          map.addLayer({
+            id: "admin-sectors-line", type: "line", source: "admin-boundaries",
+            maxzoom: 12, filter: ["==", ["get", "level"], 8],
+            paint: { "line-color": "#064239", "line-width": 2.5 },
+          });
+          map.addLayer({
+            id: "admin-sectors-label", type: "symbol", source: "admin-boundaries",
+            maxzoom: 12, filter: ["==", ["get", "level"], 8],
+            layout: { "text-field": ["get", "name_ar"], "text-font": ["Klokantech Noto Sans Regular"] },
+            paint: { "text-color": "#064239", "text-halo-color": "#ffffff", "text-halo-width": 2 },
+          });
+
           // 1. طبقة الظل العميق لحدود البلديات (Level 9 Drop Shadow) لرفع الخريطة وإعطائها عمقاً وتمايزاً
           map.addLayer({
             id: "admin-municipalities-shadow",
             type: "line",
             source: "admin-boundaries",
-            maxzoom: 12.5,
+            minzoom: 12,
+            maxzoom: 13,
             filter: ["==", ["get", "level"], 9],
             layout: {
               visibility: "none",
@@ -1212,7 +1248,8 @@ export default function MapViewer({
             id: "admin-municipalities-fill",
             type: "fill",
             source: "admin-boundaries",
-            maxzoom: 12.5,
+            minzoom: 12,
+            maxzoom: 13,
             filter: ["==", ["get", "level"], 9],
             layout: {
               visibility: "none",
@@ -1240,7 +1277,8 @@ export default function MapViewer({
             id: "admin-municipalities-line",
             type: "line",
             source: "admin-boundaries",
-            maxzoom: 12.5,
+            minzoom: 12,
+            maxzoom: 13,
             filter: ["==", ["get", "level"], 9],
             layout: {
               visibility: "none",
@@ -1272,7 +1310,8 @@ export default function MapViewer({
             type: "symbol",
             source: "admin-boundaries",
             filter: ["==", ["get", "level"], 9],
-            maxzoom: 12.5,
+            minzoom: 12,
+            maxzoom: 13,
             layout: {
               visibility: "none",
               "text-field": [
@@ -1309,8 +1348,7 @@ export default function MapViewer({
             id: "admin-neighborhoods-shadow",
             type: "line",
             source: "admin-boundaries",
-            minzoom: 12.5,
-            maxzoom: 13,
+            minzoom: 13,
             filter: ["==", ["get", "id"], -1],
             layout: {
               visibility: "none",
@@ -1333,8 +1371,7 @@ export default function MapViewer({
             id: "admin-neighborhoods-fill",
             type: "fill",
             source: "admin-boundaries",
-            minzoom: 12.5,
-            maxzoom: 13,
+            minzoom: 13,
             filter: ["==", ["get", "id"], -1],
             layout: {
               visibility: "none",
@@ -1364,8 +1401,7 @@ export default function MapViewer({
             id: "admin-neighborhoods-line",
             type: "line",
             source: "admin-boundaries",
-            minzoom: 12.5,
-            maxzoom: 13,
+            minzoom: 13,
             filter: ["==", ["get", "id"], -1],
             layout: {
               visibility: "none",
@@ -1393,8 +1429,7 @@ export default function MapViewer({
             id: "admin-neighborhoods-hit",
             type: "fill",
             source: "admin-boundaries",
-            minzoom: 12.5,
-            maxzoom: 13,
+            minzoom: 13,
             filter: ["==", ["get", "level"], 10],
             layout: {
               visibility: "none",
@@ -1410,8 +1445,7 @@ export default function MapViewer({
             id: "admin-neighborhoods-label",
             type: "symbol",
             source: "admin-boundaries",
-            minzoom: 12.5,
-            maxzoom: 13,
+            minzoom: 13,
             filter: ["==", ["get", "level"], 10],
             layout: {
               visibility: "visible",
@@ -1502,6 +1536,24 @@ export default function MapViewer({
             map.getCanvas().style.cursor = "";
             setHoveredAdminArea(null);
           });
+
+          map.on("click", "admin-sectors-fill", (e) => {
+            if (routePickModeRef.current || !showAdminAreasRef.current || !e.features?.length) return;
+            (e.originalEvent as any)._handledByLayer = true;
+            selectAdminSector(e.features[0].properties as AdminAreaProperties);
+          });
+          const hoverSector = (id: number | null) => {
+            const previous = hoveredSectorIdRef.current;
+            if (previous === id) return;
+            if (previous !== null) map.setFeatureState({ source: "admin-boundaries", id: previous }, { hover: false });
+            if (id !== null) map.setFeatureState({ source: "admin-boundaries", id }, { hover: true });
+            hoveredSectorIdRef.current = id;
+          };
+          map.on("mousemove", "admin-sectors-fill", (e) => {
+            hoverSector(e.features?.[0]?.properties.id ?? null);
+            map.getCanvas().style.cursor = "pointer";
+          });
+          map.on("mouseleave", "admin-sectors-fill", () => { hoverSector(null); map.getCanvas().style.cursor = ""; });
 
           map.on("click", "admin-municipalities-fill", (e) => {
             if (routePickModeRef.current) return;
@@ -1687,7 +1739,7 @@ export default function MapViewer({
           setupAdminLayers();
           map.on("movestart", (event: any) => {
             if (event.originalEvent) userLocation.stopFollowing();
-            for (const ref of [hoveredMunIdRef, hoveredNeighIdRef]) {
+            for (const ref of [hoveredSectorIdRef, hoveredMunIdRef, hoveredNeighIdRef]) {
               if (ref.current !== null)
                 map.setFeatureState(
                   { source: "admin-boundaries", id: ref.current },
@@ -1704,7 +1756,6 @@ export default function MapViewer({
           refreshPoiLayer(map, selectedCategoriesRef.current);
           setLoading(false);
 
-          // إظهار كامل محافظة دمشق ببلدياتها الـ 16 من البداية دون قص أي بلدية
           map.fitBounds(DAMASCUS_BOUNDS, {
             padding: { top: 60, bottom: 60, left: 60, right: 60 },
             duration: 0,
@@ -1787,6 +1838,7 @@ export default function MapViewer({
           id,
           selectedMunicipality
             ? ["==", ["get", "id"], selectedMunicipality.id]
+            : activeAdminSector ? ["==", ["get", "parent_id"], activeAdminSector.id]
             : ["==", ["get", "level"], 9],
         );
     });
@@ -1796,7 +1848,9 @@ export default function MapViewer({
           ["==", ["get", "level"], 10],
           ["==", ["get", "parent_id"], selectedMunicipality.id],
         ]
-      : ["==", ["get", "level"], 10];
+      : activeAdminSector
+        ? ["in", ["get", "parent_id"], ["literal", adminFeatures.filter(f => f.properties.parent_id === activeAdminSector.id).map(f => f.properties.id)]]
+        : ["==", ["get", "level"], 10];
     neighborhoodLayers.forEach((id) => {
       if (map.getLayer(id)) map.setFilter(id, neighborhoodFilter);
     });
@@ -1814,8 +1868,9 @@ export default function MapViewer({
     }
     const syncZoomVisibility = () => {
       const zoom = map.getZoom();
-      const showNeighborhoods = showBoundaries && zoom >= 12.5 && zoom < 13;
-      setVisible(municipalityLayers, showBoundaries && zoom < 12.5);
+      const showNeighborhoods = showBoundaries && zoom >= 13 && zoom < 14;
+      setVisible(["admin-sectors-fill", "admin-sectors-line", "admin-sectors-label"], showBoundaries && zoom < 12);
+      setVisible(municipalityLayers, showBoundaries && zoom >= 12 && zoom < 13);
       setVisible(neighborhoodLayers, showNeighborhoods);
       setVisible(
         ["admin-neighborhoods-fill"],
@@ -1828,6 +1883,8 @@ export default function MapViewer({
   }, [
     loading,
     showAdminAreas,
+    activeAdminSector,
+    adminFeatures,
     selectedCategories,
     selectedMunicipality,
     selectedNeighborhood,
@@ -2838,7 +2895,7 @@ export default function MapViewer({
       )}
 
       {/* شريط المسار الهرمي الذكي (Smart City Hierarchy Breadcrumb) */}
-      {selectedMunicipality && showAdminAreas && (
+      {(activeAdminSector || selectedMunicipality) && showAdminAreas && (
         <div
           className="map-header-breadcrumb fixed sm:absolute right-3 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 z-20 flex items-center gap-1.5 px-3.5 py-1.5 bg-[#fdfbf7]/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#064239]/20 dark:border-white/10 text-xs font-bold animate-in fade-in slide-in-from-top-2 duration-200"
           dir="rtl"
@@ -2847,13 +2904,16 @@ export default function MapViewer({
             type="button"
             onClick={handleResetToAllMunicipalities}
             className="flex items-center gap-1 text-zinc-500 hover:text-[#064239] dark:hover:text-emerald-400 cursor-pointer transition-colors"
-            title="العودة لعرض كافة بلديات دمشق"
+            title="العودة لعرض كافة قطاعات دمشق"
           >
             <Layers className="w-3.5 h-3.5 text-[#064239] dark:text-emerald-400" />
-            <span>بلديات دمشق (16)</span>
+            <span>قطاعات دمشق</span>
           </button>
           <ChevronLeft className="w-3.5 h-3.5 text-zinc-400" />
-          <button
+          {activeAdminSector && (
+            <button type="button" onClick={() => selectAdminSector(activeAdminSector)}>{activeAdminSector.name_ar}</button>
+          )}
+          {selectedMunicipality && <button
             type="button"
             onClick={handleResetToMunicipality}
             className={`flex items-center gap-1 cursor-pointer transition-colors ${
@@ -2867,7 +2927,7 @@ export default function MapViewer({
             <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-[#064239]/10 dark:bg-white/10">
               {childNeighborhoods.length}
             </span>
-          </button>
+          </button>}
           {selectedNeighborhood && (
             <>
               <ChevronLeft className="w-3.5 h-3.5 text-zinc-400" />
