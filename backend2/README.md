@@ -73,16 +73,132 @@ composer lint                         # تنسيق الكود (Pint)
 composer test                         # lint + phpstan + الاختبارات
 ```
 
-## هيكلة الكود
-
-```
-Controller (رفيع: يستقبل ويرد فقط)
-   └── Service (المنطق)   app/Services
-          └── Model       app/Models
-Form Requests  → التحقق        app/Http/Requests
-API Resources  → شكل الـ JSON  app/Http/Resources
-Support        → دوال مساعدة   app/Support (SearchIndex, Geometry)
-```
-
 الـ Controller ما فيه منطق: كل شيء بالـ Service.
 
+## هيكلة الكود
+
+تم تنظيم المشروع حسب نوع الـ API والجهة التي تستخدمه، لتسهيل توزيع العمل بين المطورين وفصل المسؤوليات.
+
+### 1. Controllers
+
+المسار: `app/Http/Controllers/Api/`
+
+```text
+Controllers/
+└── Api/
+    ├── Admin/       # APIs الخاصة بلوحة الإدارة
+    ├── General/     # APIs العامة والمشتركة
+    └── App/         # APIs الخاصة بتطبيق المستخدم
+```
+
+**مسؤولية Controller:**
+- استقبال HTTP Request.
+- استدعاء الـ Service المناسب.
+- إرجاع HTTP Response.
+- لا يحتوي على منطق الأعمال (Business Logic).
+
+### 2. Form Requests
+
+المسار: `app/Http/Requests/Api/`
+
+```text
+Requests/
+└── Api/
+    ├── Admin/       # Validation لطلبات الإدارة
+    ├── General/     # Validation للطلبات العامة
+    └── App/         # Validation لطلبات التطبيق
+```
+
+**مسؤولية Form Request:**
+- التحقق من صحة البيانات القادمة من المستخدم (Validation).
+- تحديد قواعد التحقق ورسائل الأخطاء.
+- إبقاء منطق التحقق منفصلاً عن Controller.
+
+### 3. Services
+
+المسار: `app/Services/`
+
+```text
+Services/
+├── Admin/           # منطق الأعمال الخاص بالإدارة
+├── General/         # منطق الأعمال المشترك والعام
+└── App/             # منطق الأعمال الخاص بالتطبيق
+```
+
+**مسؤولية Service:**
+- تنفيذ منطق الأعمال (Business Logic).
+- التعامل مع Models وقاعدة البيانات عند الحاجة.
+- تنفيذ العمليات المطلوبة وإرجاع النتائج إلى Controller.
+- عدم التعامل مباشرة مع HTTP Request أو Response.
+
+> ملاحظة: مجلد Services لا يحتوي على مجلد Api؛ لأن تقسيمه يعتمد على مجال العمل والجهة المستفيدة، وليس على طبقة HTTP.
+
+### 4. Models
+
+المسار: `app/Models/`
+
+```text
+Models/
+├── AdminArea.php
+├── Street.php
+└── ...
+```
+
+تمثل الـ Models جداول قاعدة البيانات والعلاقات بينها، وتُستخدم من قبل Services للتعامل مع البيانات.
+
+### 5. API Resources
+
+المسار: `app/Http/Resources/`
+
+تُستخدم لتحديد شكل البيانات (JSON Response) التي يتم إرجاعها من الـ API، وفصل تنسيق المخرجات عن منطق الأعمال.
+
+### 6. Support
+
+المسار: `app/Support/`
+
+يحتوي على الوظائف المساعدة المشتركة التي يمكن استخدامها في أكثر من مكان، مثل:
+
+- `SearchIndex`: توحيد وتجهيز النصوص المستخدمة في البحث.
+- `Geometry`: الوظائف المساعدة المتعلقة بالبيانات الجغرافية.
+
+---
+
+### آلية تدفق الطلب (Request Flow)
+
+```text
+HTTP Request
+     │
+     ▼
+Form Request
+(Validation)
+     │
+     ▼
+Controller
+(استقبال الطلب وتوجيهه)
+     │
+     ▼
+Service
+(Business Logic)
+     │
+     ▼
+Model
+(Database Operations)
+     │
+     ▼
+API Resource
+(JSON Formatting)
+     │
+     ▼
+HTTP Response
+```
+
+### المبادئ المعتمدة في تنظيم المشروع
+
+1. **Separation of Concerns:** كل طبقة مسؤولة عن مهمة محددة.
+2. **Thin Controllers:** الـ Controllers تستقبل الطلبات وتستدعي الخدمات فقط.
+3. **Business Logic in Services:** منطق الأعمال يكون داخل Services وليس Controllers.
+4. **Request Validation:** التحقق من البيانات يتم عبر Form Requests.
+5. **Consistent API Responses:** تنسيق JSON يتم عبر API Resources عند الحاجة.
+6. **Code Reusability:** الوظائف المشتركة توضع داخل Support لتجنب تكرار الكود.
+
+**ملاحظة:** تقسيم الملفات إلى مجلدات داخلية هو تنظيم للكود فقط، ولا يعني تغيير مسارات الـ API أو أسماء الـ Endpoints الحالية.

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Street;
 
 class AdminArea extends Model
 {
@@ -87,5 +88,10 @@ class AdminArea extends Model
     public function centroid(): array
     {
         return Geometry::centroid($this->boundary);
+    }
+    
+    public function streets(): HasMany
+    {
+        return $this->hasMany(Street::class, 'admin_area_id');
     }
 }

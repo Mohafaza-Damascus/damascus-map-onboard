@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\General;
 
-use App\Http\Requests\IndexAdminAreaRequest;
-use App\Http\Requests\LookupAdminAreaRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\General\IndexAdminAreaRequest;
+use App\Http\Requests\Api\General\LookupAdminAreaRequest;
 use App\Http\Resources\AdminAreaFeatureCollection;
-use App\Services\AdminAreaService;
+use App\Services\General\AdminAreaService;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;

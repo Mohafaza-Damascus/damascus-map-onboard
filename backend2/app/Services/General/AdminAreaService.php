@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\General;
 
 use App\Models\AdminArea;
 use App\Support\Geometry;
