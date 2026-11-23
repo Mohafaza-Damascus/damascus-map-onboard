@@ -1,0 +1,283 @@
+[
+  {
+    "slug": "damascus-governorate",
+    "name_ar": "مباني محافظة دمشق",
+    "name_en": "Damascus Governorate Buildings",
+    "icon": "landmark",
+    "sort_order": 1,
+    "subcategories": [
+      {
+        "slug": "citizen-service-centers",
+        "name_ar": "مراكز خدمة المواطن",
+        "name_en": "Citizen Service Centers"
+      },
+      {
+        "slug": "municipality-buildings",
+        "name_ar": "دوائر الخدمات",
+        "name_en": "Municipality Buildings"
+      },
+      {
+        "slug": "municipalities",
+        "name_ar": "بلديات",
+        "name_en": "Municipalities"
+      }
+    ]
+  },
+  {
+    "slug": "government",
+    "name_ar": "مباني حكومية",
+    "name_en": "Government Buildings",
+    "icon": "landmark",
+    "sort_order": 2,
+    "subcategories": [
+      {
+        "slug": "ministries",
+        "name_ar": "الوزارات",
+        "name_en": "Ministries"
+      },
+      {
+        "slug": "central-directorates",
+        "name_ar": "المديريات المركزية والهيئات",
+        "name_en": "Central Directorates and Bodies"
+      },
+      {
+        "slug": "embassies-consulates",
+        "name_ar": "السفارات والقنصليات",
+        "name_en": "Embassies and Consulates"
+      },
+      {
+        "slug": "courts",
+        "name_ar": "المحاكم",
+        "name_en": "Courts"
+      },
+      {
+        "slug": "police-stations",
+        "name_ar": "مخافر",
+        "name_en": "Police Stations"
+      }
+    ]
+  },
+  {
+    "slug": "economy",
+    "name_ar": "اقتصاد",
+    "name_en": "Economy",
+    "icon": "coins",
+    "sort_order": 6,
+    "subcategories": [
+      {
+        "slug": "banks",
+        "name_ar": "البنوك",
+        "name_en": "Banks"
+      },
+      {
+        "slug": "atm",
+        "name_ar": "أجهزة الصراف الآلي",
+        "name_en": "ATM"
+      }
+    ]
+  },
+  {
+    "slug": "public-facilities",
+    "name_ar": "المرافق العامة",
+    "name_en": "Public Facilities",
+    "icon": "trees",
+    "sort_order": 3,
+    "subcategories": [
+      {
+        "slug": "parks",
+        "name_ar": "حدائق",
+        "name_en": "Parks"
+      },
+      {
+        "slug": "squares",
+        "name_ar": "ساحات",
+        "name_en": "Squares"
+      },
+      {
+        "slug": "departure-centers",
+        "name_ar": "مراكز انطلاق",
+        "name_en": "Departure Centers"
+      },
+      {
+        "slug": "interchange-centers",
+        "name_ar": "مركز تبادلي",
+        "name_en": "Interchange Centers"
+      },
+      {
+        "slug": "airports",
+        "name_ar": "مطارات",
+        "name_en": "Airports"
+      },
+      {
+        "slug": "historic-landmarks",
+        "name_ar": "معالم أثرية",
+        "name_en": "Historic Landmarks"
+      },
+      {
+        "slug": "rubble-dumps",
+        "name_ar": "مكبات أنقاض",
+        "name_en": "Rubble Dumps"
+      },
+      {
+        "slug": "immigration-passports",
+        "name_ar": "الهجرة والجوازات",
+        "name_en": "Immigration and Passports"
+      },
+      {
+        "slug": "entertainment",
+        "name_ar": "ترفيه",
+        "name_en": "Entertainment"
+      },
+      {
+        "slug": "stadiums",
+        "name_ar": "ملاعب",
+        "name_en": "Stadiums"
+      },
+      {
+        "slug": "cinemas",
+        "name_ar": "سينما",
+        "name_en": "Cinemas"
+      },
+      {
+        "slug": "theaters",
+        "name_ar": "مسارح",
+        "name_en": "Theaters"
+      },
+      {
+        "slug": "opera-house",
+        "name_ar": "دار الأوبرا",
+        "name_en": "Opera House"
+      },
+      {
+        "slug": "commercial-markets",
+        "name_ar": "الأسواق التجارية",
+        "name_en": "Commercial Markets"
+      },
+      {
+        "slug": "malls",
+        "name_ar": "مراكز تسوق",
+        "name_en": "Malls"
+      }
+    ]
+  },
+  {
+    "slug": "communications",
+    "name_ar": "اتصالات",
+    "name_en": "Communications",
+    "icon": "phone",
+    "sort_order": 4,
+    "subcategories": [
+      {
+        "slug": "post-offices",
+        "name_ar": "مراكز بريد",
+        "name_en": "Post Offices"
+      },
+      {
+        "slug": "mobile-service-centers",
+        "name_ar": "مركز خدمة الجوال",
+        "name_en": "Mobile Service Centers"
+      }
+    ]
+  },
+  {
+    "slug": "education",
+    "name_ar": "تربية وتعليم",
+    "name_en": "Education",
+    "icon": "graduation-cap",
+    "sort_order": 9,
+    "subcategories": [
+      {
+        "slug": "schools",
+        "name_ar": "مدارس",
+        "name_en": "Schools"
+      },
+      {
+        "slug": "colleges",
+        "name_ar": "كليات",
+        "name_en": "Colleges"
+      },
+      {
+        "slug": "institutes",
+        "name_ar": "معاهد",
+        "name_en": "Institutes"
+      },
+      {
+        "slug": "kindegartens",
+        "name_ar": "روضات",
+        "name_en": "Kindergartens"
+      }
+    ]
+  },
+  {
+    "slug": "religious",
+    "name_ar": "دور العبادة",
+    "name_en": "Religious Places",
+    "icon": "moon",
+    "sort_order": 7,
+    "subcategories": [
+      {
+        "slug": "mosques",
+        "name_ar": "مساجد",
+        "name_en": "Mosques"
+      },
+      {
+        "slug": "churches",
+        "name_ar": "كنائس",
+        "name_en": "Churches"
+      },
+      {
+        "slug": "religious-centers",
+        "name_ar": "مراكز شرعية",
+        "name_en": "Religious Centers"
+      }
+    ]
+  },
+  {
+    "slug": "healthcare",
+    "name_ar": "صحة",
+    "name_en": "Healthcare",
+    "icon": "hospital",
+    "sort_order": 5,
+    "subcategories": [
+      {
+        "slug": "hospitals",
+        "name_ar": "مستشفيات",
+        "name_en": "Hospitals"
+      },
+      {
+        "slug": "blood-banks",
+        "name_ar": "بنوك الدم",
+        "name_en": "Blood Banks"
+      },
+      {
+        "slug": "health-centers",
+        "name_ar": "مراكز صحية",
+        "name_en": "Health Centers"
+      },
+      {
+        "slug": "pharmacies",
+        "name_ar": "صيدليات",
+        "name_en": "Pharmacies"
+      }
+    ]
+  },
+  {
+    "slug": "culture",
+    "name_ar": "ثقافة",
+    "name_en": "Culture",
+    "icon": "book",
+    "sort_order": 8,
+    "subcategories": [
+      {
+        "slug": "cultural-centers",
+        "name_ar": "مراكز ثقافية",
+        "name_en": "Cultural Centers"
+      },
+      {
+        "slug": "institues",
+        "name_ar": "معاهد ثقافية",
+        "name_en": "Cultural Institutes"
+      }
+    ]
+  }
+]

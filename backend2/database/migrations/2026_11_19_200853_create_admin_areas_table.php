@@ -21,8 +21,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->jsonb('boundary');
             $table->string('search_text', 500)->default('')->index();
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
+            $table->timestamps();
 
             $table->index(['level', 'code']);
         });

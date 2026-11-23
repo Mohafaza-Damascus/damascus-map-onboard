@@ -2,49 +2,37 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Street;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * شارع واحد بصيغة GeoJSON Feature (للخريطة).
+ *
+ * @mixin Street
+ */
 class StreetFeatureResource extends JsonResource
 {
+    // بدون غلاف "data" حتى يبقى الشكل مطابق لـ Django
+    public static $wrap = null;
+
     public function toArray(Request $request): array
     {
-        $highway = $this->highway_type ?: 'residential';
-
-        $roadClass = str_ends_with($highway, '_link')
-            ? substr($highway, 0, -5)
-            : $highway;
-
-        if (in_array($roadClass, [
-            'residential',
-            'unclassified',
-            'living_street',
-            'road',
-        ], true)) {
-            $roadClass = 'minor';
-        } elseif (in_array($roadClass, [
-            'footway',
-            'cycleway',
-            'pedestrian',
-            'steps',
-            'bridleway',
-        ], true)) {
-            $roadClass = 'path';
-        }
+        $name = $this->name_ar ?: $this->name_en;
 
         return [
             'type' => 'Feature',
             'id' => $this->id,
             'properties' => [
                 'id' => $this->id,
-                'name' => $this->name_ar ?: $this->name_en,
-                'name:ar' => $this->name_ar ?: $this->name_en,
+                'name' => $name,
+                'name:ar' => $name,
                 'name:latin' => $this->name_en,
                 'name_ar' => $this->name_ar,
                 'name_en' => $this->name_en,
-                'highway_type' => $highway,
-                'class' => $roadClass,
-                'ramp' => (int) str_ends_with($highway, '_link'),
+                'highway_type' => $this->highwayOrDefault(),
+                'class' => $this->roadClass(),
+                'ramp' => (int) $this->isRamp(),
                 'admin_area_id' => $this->admin_area_id,
             ],
             'geometry' => $this->geometry,

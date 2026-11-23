@@ -19,6 +19,7 @@ return new class extends Migration
 
             $table->foreignId('admin_area_id')
                 ->nullable()
+                ->index()
                 ->constrained('admin_areas')
                 ->nullOnDelete();
 
@@ -34,8 +35,7 @@ return new class extends Migration
 
             $table->boolean('is_active')->default(true);
 
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
+            $table->timestamps();
         });
     }
 
