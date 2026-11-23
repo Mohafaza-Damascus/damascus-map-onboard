@@ -308,7 +308,7 @@ body {
 .map-header-theme {
   position: absolute;
   left: 45px;
-  bottom: 20px;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px));
 }
 
 .map-header-categories {
@@ -324,7 +324,7 @@ body {
 
 .map-place-card {
   --map-card-top: max(92px, calc(env(safe-area-inset-top, 0px) + 82px));
-  --map-card-bottom: max(128px, calc(env(safe-area-inset-bottom, 0px) + 104px));
+  --map-card-bottom: max(17%, calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px));
   position: absolute;
   top: var(--map-card-top);
   left: 16px;
@@ -333,8 +333,19 @@ body {
   width: 380px;
   max-width: calc(100% - 32px);
   height: auto;
-  max-height: min(62dvh, calc(100% - var(--map-card-top) - var(--map-card-bottom)));
+  max-height: calc(100% - var(--map-card-top) - var(--map-card-bottom));
   border-radius: 24px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .map-place-card {
+    animation: place-card-enter 550ms ease-out;
+  }
+}
+
+@keyframes place-card-enter {
+  from { transform: translateX(calc(-100% - 16px)); }
+  to { transform: translateX(0); }
 }
 
 .map-header-breadcrumb {
@@ -342,20 +353,9 @@ body {
 }
 
 
-@media (max-width: 1100px) {
-
-  .map-header-theme>button>span,
-  .map-header-theme>button>svg:last-child {
-    display: none;
-
-  }
-}
-
 @media (max-width: 639px) {
   .map-place-card {
-    --map-card-top: max(72px, calc(env(safe-area-inset-top, 0px) + 64px));
-    --map-card-bottom: max(96px, calc(env(safe-area-inset-bottom, 0px) + 72px));
-    top: var(--map-card-top);
+    --map-card-top: calc(env(safe-area-inset-top, 0px) + 138px);
     left: 12px;
     width: 320px;
     max-width: calc(100% - 32px);
@@ -385,11 +385,6 @@ body {
   .map-header-categories {
     padding-inline-start: 2px;
   }
-
-  .map-header-theme>button {
-    padding-inline: 10px;
-  }
-
 
   .map-header-breadcrumb {
     top: max(80px, calc(env(safe-area-inset-top, 0px) + 68px));

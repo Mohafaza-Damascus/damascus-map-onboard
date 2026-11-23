@@ -328,7 +328,7 @@ export default function PlaceDetailDrawer({
   return (
     <>
       <div
-        className="map-place-card z-50 bg-[#fdfbf7] dark:bg-zinc-900 shadow-2xl rounded-3xl border border-[#064239]/20 dark:border-white/10 flex flex-col animate-in slide-in-from-left fade-in duration-300 overflow-hidden"
+        className="map-place-card z-50 bg-[#fdfbf7] dark:bg-zinc-900 shadow-2xl rounded-3xl border border-[#064239]/20 dark:border-white/10 flex flex-col overflow-hidden"
         role="region"
         aria-label={`تفاصيل ${place.title}`}
         dir="rtl"
@@ -382,7 +382,7 @@ export default function PlaceDetailDrawer({
         >
           <div
             onClick={() => setLightboxIndex(activeMediaIndex)}
-            className="relative h-56 sm:h-64 w-full overflow-hidden shrink-0 bg-zinc-800 cursor-pointer group"
+            className="relative h-48 sm:h-56 w-full overflow-hidden shrink-0 bg-zinc-800 cursor-pointer group"
             title="انقر لفتح الصورة أو الفيديو بحجم كامل"
           >
             {activeMedia?.type === "video" ? (
