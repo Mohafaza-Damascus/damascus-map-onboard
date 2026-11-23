@@ -19,7 +19,7 @@ class Command(BaseCommand):
         for entry in entries:
             subcategory = SubCategory.objects.get(
                 category__slug=entry['category'], slug=entry['subcategory']
-            )
+            ) if entry['subcategory'] is not None else None
             area = (AdminArea.objects.get(pk=entry['admin_area_id'], name_ar=entry['admin_area_name'])
                     if entry['admin_area_id'] else None)
             _, is_new = Place.objects.update_or_create(

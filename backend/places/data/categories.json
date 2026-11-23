@@ -13,13 +13,13 @@
       },
       {
         "slug": "municipality-buildings",
-        "name_ar": "دوائر الخدمات",
-        "name_en": "Municipality Buildings"
+        "name_ar": "دوائر الخدمات (البلديات)",
+        "name_en": "Service Departments (Municipalities)"
       },
       {
-        "slug": "municipalities",
-        "name_ar": "بلديات",
-        "name_en": "Municipalities"
+        "slug": "governorate-directorates",
+        "name_ar": "المديريات",
+        "name_en": "Directorates"
       }
     ]
   },
@@ -52,8 +52,18 @@
       },
       {
         "slug": "police-stations",
-        "name_ar": "مخافر",
-        "name_en": "Police Stations"
+        "name_ar": "مراكز الأمن العام",
+        "name_en": "Public Security Centers"
+      },
+      {
+        "slug": "immigration-passports",
+        "name_ar": "الهجرة والجوازات",
+        "name_en": "Immigration and Passports"
+      },
+      {
+        "slug": "civil-affairs",
+        "name_ar": "الشؤون المدنية",
+        "name_en": "Civil Affairs"
       }
     ]
   },
@@ -85,78 +95,33 @@
     "subcategories": [
       {
         "slug": "parks",
-        "name_ar": "حدائق",
+        "name_ar": "الحدائق",
         "name_en": "Parks"
       },
       {
         "slug": "squares",
-        "name_ar": "ساحات",
+        "name_ar": "الساحات",
         "name_en": "Squares"
       },
       {
         "slug": "departure-centers",
-        "name_ar": "مراكز انطلاق",
-        "name_en": "Departure Centers"
-      },
-      {
-        "slug": "interchange-centers",
-        "name_ar": "مركز تبادلي",
-        "name_en": "Interchange Centers"
+        "name_ar": "مراكز الانطلاق (البولمان)",
+        "name_en": "Coach Departure Centers"
       },
       {
         "slug": "airports",
-        "name_ar": "مطارات",
-        "name_en": "Airports"
-      },
-      {
-        "slug": "historic-landmarks",
-        "name_ar": "معالم أثرية",
-        "name_en": "Historic Landmarks"
+        "name_ar": "مطار دمشق الدولي",
+        "name_en": "Damascus International Airport"
       },
       {
         "slug": "rubble-dumps",
-        "name_ar": "مكبات أنقاض",
+        "name_ar": "مكبات الأنقاض",
         "name_en": "Rubble Dumps"
-      },
-      {
-        "slug": "immigration-passports",
-        "name_ar": "الهجرة والجوازات",
-        "name_en": "Immigration and Passports"
-      },
-      {
-        "slug": "entertainment",
-        "name_ar": "ترفيه",
-        "name_en": "Entertainment"
-      },
-      {
-        "slug": "stadiums",
-        "name_ar": "ملاعب",
-        "name_en": "Stadiums"
-      },
-      {
-        "slug": "cinemas",
-        "name_ar": "سينما",
-        "name_en": "Cinemas"
-      },
-      {
-        "slug": "theaters",
-        "name_ar": "مسارح",
-        "name_en": "Theaters"
-      },
-      {
-        "slug": "opera-house",
-        "name_ar": "دار الأوبرا",
-        "name_en": "Opera House"
       },
       {
         "slug": "commercial-markets",
         "name_ar": "الأسواق التجارية",
         "name_en": "Commercial Markets"
-      },
-      {
-        "slug": "malls",
-        "name_ar": "مراكز تسوق",
-        "name_en": "Malls"
       }
     ]
   },
@@ -277,6 +242,45 @@
         "slug": "institues",
         "name_ar": "معاهد ثقافية",
         "name_en": "Cultural Institutes"
+      },
+      {
+        "slug": "opera-house",
+        "name_ar": "دار الأوبرا",
+        "name_en": "Opera House"
+      }
+    ]
+  },
+  {
+    "slug": "tourism",
+    "name_ar": "السياحة والترفيه",
+    "name_en": "Tourism and Entertainment",
+    "icon": "sparkles",
+    "sort_order": 10,
+    "subcategories": [
+      {
+        "slug": "historic-landmarks",
+        "name_ar": "معالم أثرية",
+        "name_en": "Historic Landmarks"
+      },
+      {
+        "slug": "stadiums",
+        "name_ar": "ملاعب",
+        "name_en": "Stadiums"
+      },
+      {
+        "slug": "cinemas",
+        "name_ar": "سينما",
+        "name_en": "Cinemas"
+      },
+      {
+        "slug": "theaters",
+        "name_ar": "مسارح",
+        "name_en": "Theaters"
+      },
+      {
+        "slug": "malls",
+        "name_ar": "مراكز تسوق",
+        "name_en": "Malls"
       }
     ]
   }

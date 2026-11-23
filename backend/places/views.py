@@ -88,7 +88,7 @@ def list_place_sectors(request):
 
     categories_without_sectors = {
         'public-facilities', 'communications', 'economy', 'religious',
-        'culture', 'damascus-governorate', 'government',
+        'culture', 'tourism', 'damascus-governorate', 'government',
     }
     if category in categories_without_sectors or (
         category == 'healthcare' and subcategory in {'blood-banks', 'pharmacies'}

@@ -21,7 +21,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         subcategory = SubCategory.objects.get(
-            category__slug='damascus-governorate', slug='municipalities'
+            category__slug='damascus-governorate', slug='municipality-buildings'
         )
         created = 0
         for name, lat, lon in MUNICIPALITIES:
