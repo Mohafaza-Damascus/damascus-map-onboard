@@ -1,4 +1,5 @@
 [
+  {"name": "مطار دمشق الدولي", "subcategory": "airports", "latitude": 33.412028, "longitude": 36.513339},
   {"name": "حديقة السبكي", "subcategory": "parks", "latitude": 33.519051, "longitude": 36.2884654},
   {"name": "حديقة الصوفانية", "subcategory": "parks", "latitude": 33.5145077, "longitude": 36.3174687},
   {"name": "ساحة المرجة", "subcategory": "squares", "latitude": 33.5127867, "longitude": 36.2980744},

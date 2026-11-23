@@ -8,6 +8,8 @@ from urllib.request import Request, urlopen
 
 from django.conf import settings
 
+from .map_bounds import MAP_BOUNDS
+
 
 class RoutingError(Exception):
     def __init__(self, code, message, status=502):
@@ -95,7 +97,7 @@ def calculate_car_route(waypoints, *, enforce_damascus=False):
     return _calculate_route(
         waypoints,
         profile='car-eco',
-        bounds=settings.CAR_ROUTING_BOUNDS if enforce_damascus else None,
+        bounds=MAP_BOUNDS if enforce_damascus else None,
         max_snap_metres=settings.CAR_ROUTING_MAX_SNAP_METRES if enforce_damascus else None,
         no_route_message='لم يُعثر على مسار قابل للقيادة',
         no_nearby_road_code='no_drivable_road',
@@ -107,7 +109,7 @@ def calculate_walking_route(waypoints):
     return _calculate_route(
         waypoints,
         profile=settings.WALK_ROUTING_PROFILE,
-        bounds=settings.WALK_ROUTING_BOUNDS,
+        bounds=MAP_BOUNDS,
         max_snap_metres=settings.WALK_ROUTING_MAX_SNAP_METRES,
         no_route_message='لم يُعثر على مسار صالح للمشي',
         no_nearby_road_code='no_walkable_road',

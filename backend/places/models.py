@@ -1,3 +1,4 @@
+from .map_bounds import MAP_BOUNDS
 from django.db import models
 from django.contrib.gis.db import models as gis_models
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -173,10 +174,7 @@ class SubCategory(models.Model):
 #! جدول الاماكن
 #!Done
 # حدود الإحداثيات المسموحة
-LAT_MIN = 33.40
-LAT_MAX = 33.63
-LON_MIN = 36.14
-LON_MAX = 36.44
+LON_MIN, LAT_MIN, LON_MAX, LAT_MAX = MAP_BOUNDS
 
 
 class Place(models.Model):
