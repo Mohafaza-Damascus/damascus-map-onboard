@@ -26,23 +26,18 @@ class AdminAreaSeeder extends Seeder
 
         $this->command->info("Found {$features->count()} features in GeoJSON. Beginning import...");
 
-        DB::transaction(function () use ($features) {
-            // unguarded لأن id مو بالـ $fillable ونحن بدنا نحافظ على نفس الـ ids القديمة
-            Model::unguarded(function () use ($features) {
-                foreach ($features as $feature) {
-                    $p = $feature['properties'];
+        // id => name_ar، لحساب search_text (اسم الأب) بدون الاعتماد على أحداث الموديل
+        $names = $features
+            ->mapWithKeys(fn ($f) => [$f['properties']['id'] => $f['properties']['name_ar']])
+            ->all();
 
+        DB::transaction(function () use ($features, $names) {
+            // unguarded لأن id مو بالـ $fillable ونحن بدنا نحافظ على نفس الـ ids القديمة
+            Model::unguarded(function () use ($features, $names) {
+                foreach ($features as $feature) {
                     AdminArea::updateOrCreate(
-                        ['id' => $p['id']],
-                        [
-                            'level' => $p['level'],
-                            'parent_id' => $p['parent_id'] ?? null,
-                            'name_ar' => $p['name_ar'],
-                            'name_en' => $p['name_en'] ?? '',
-                            'code' => $p['code'] ?? '',
-                            'pcode' => $p['pcode'] ?? null,
-                            'boundary' => $feature['geometry'],
-                        ]
+                        ['id' => $feature['properties']['id']],
+                        $this->attributesFor($feature, $names)
                     );
                 }
             });
@@ -54,5 +49,28 @@ class AdminAreaSeeder extends Seeder
         });
 
         $this->command->info("Imported {$features->count()} administrative areas");
+    }
+
+    /**
+     * @param  array<string, mixed>  $feature
+     * @param  array<int, string>  $names  id => name_ar
+     * @return array<string, mixed>
+     */
+    private function attributesFor(array $feature, array $names): array
+    {
+        $p = $feature['properties'];
+        $parentName = isset($p['parent_id']) ? ($names[$p['parent_id']] ?? null) : null;
+
+        return [
+            'level' => $p['level'],
+            'parent_id' => $p['parent_id'] ?? null,
+            'name_ar' => $p['name_ar'],
+            'name_en' => $p['name_en'] ?? '',
+            'code' => $p['code'] ?? '',
+            'pcode' => $p['pcode'] ?? null,
+            'boundary' => $feature['geometry'],
+            // نحسبه هون صراحةً: ما بنعتمد على أحداث الموديل لأنها بتتعطّل بـ WithoutModelEvents
+            'search_text' => AdminArea::searchTextFor($p['name_ar'], $p['name_en'] ?? '', $parentName, $p['code'] ?? ''),
+        ];
     }
 }

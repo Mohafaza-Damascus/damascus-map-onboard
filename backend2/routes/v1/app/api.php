@@ -2,8 +2,8 @@
 <?php
 
 use App\Http\Controllers\Api\General\AdminAreaController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\General\StreetController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('admin-areas/', [AdminAreaController::class, 'index'])
     ->name('admin_areas_geojson');
@@ -11,4 +11,5 @@ Route::get('admin-areas/', [AdminAreaController::class, 'index'])
 Route::get('admin-areas/lookup/', [AdminAreaController::class, 'lookup'])
     ->middleware('throttle:admin-area-lookup');
 
-Route::get('/streets/geojson/', [StreetController::class, 'geoJson']);
+Route::get('streets/geojson', [StreetController::class, 'geojson'])
+    ->name('streets_geojson');

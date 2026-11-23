@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Street;
 
 class AdminArea extends Model
 {
@@ -37,13 +36,22 @@ class AdminArea extends Model
     {
         // نفس save() بـ Django: بيحسب search_text قبل كل حفظ
         static::saving(function (AdminArea $area) {
-            $area->search_text = SearchIndex::build(
+            $area->search_text = static::searchTextFor(
                 $area->name_ar,
                 $area->name_en,
-                $area->parent?->name_ar ?? '',
+                $area->parent?->name_ar,
                 $area->code
             );
         });
+    }
+
+    /**
+     * نص البحث المعاير. بمكان واحد حتى يستخدمو الـ hook والـ Seeder
+     * (الـ Seeder بيحسبو بنفسو لأنو أحداث الموديل بتتعطّل مع WithoutModelEvents).
+     */
+    public static function searchTextFor(string $nameAr, ?string $nameEn, ?string $parentName, ?string $code): string
+    {
+        return SearchIndex::build($nameAr, $nameEn, $parentName ?? '', $code);
     }
 
     public function parent(): BelongsTo
@@ -89,7 +97,7 @@ class AdminArea extends Model
     {
         return Geometry::centroid($this->boundary);
     }
-    
+
     public function streets(): HasMany
     {
         return $this->hasMany(Street::class, 'admin_area_id');
