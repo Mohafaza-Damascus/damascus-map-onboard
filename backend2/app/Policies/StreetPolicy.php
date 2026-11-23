@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\AdminArea;
+use App\Models\Street;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class AdminAreaPolicy
+class StreetPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +19,7 @@ class AdminAreaPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, AdminArea $adminArea): bool
+    public function view(User $user, Street $street): bool
     {
         return false;
     }
@@ -35,7 +35,7 @@ class AdminAreaPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, AdminArea $adminArea): bool
+    public function update(User $user, Street $street): bool
     {
         return false;
     }
@@ -43,7 +43,7 @@ class AdminAreaPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, AdminArea $adminArea): bool
+    public function delete(User $user, Street $street): bool
     {
         return false;
     }
@@ -51,7 +51,7 @@ class AdminAreaPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, AdminArea $adminArea): bool
+    public function restore(User $user, Street $street): bool
     {
         return false;
     }
@@ -59,7 +59,7 @@ class AdminAreaPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, AdminArea $adminArea): bool
+    public function forceDelete(User $user, Street $street): bool
     {
         return false;
     }

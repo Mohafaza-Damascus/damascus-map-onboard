@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Api\General;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreAdminAreaRequest extends FormRequest
+class StoreStreetRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

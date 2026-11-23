@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Api\General;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateAdminAreaRequest extends FormRequest
+class UpdateStreetRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
