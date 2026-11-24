@@ -99,6 +99,11 @@
         "name_en": "Parks"
       },
       {
+        "slug": "gas-stations",
+        "name_ar": "محطات الوقود",
+        "name_en": "Gas Stations"
+      },
+      {
         "slug": "squares",
         "name_ar": "الساحات",
         "name_en": "Squares"
@@ -182,17 +187,17 @@
     "subcategories": [
       {
         "slug": "mosques",
-        "name_ar": "مساجد",
+        "name_ar": "المساجد",
         "name_en": "Mosques"
       },
       {
         "slug": "churches",
-        "name_ar": "كنائس",
+        "name_ar": "الكنائس",
         "name_en": "Churches"
       },
       {
         "slug": "religious-centers",
-        "name_ar": "مراكز شرعية",
+        "name_ar": "المراكز الشرعية",
         "name_en": "Religious Centers"
       }
     ]
@@ -244,9 +249,14 @@
         "name_en": "Cultural Institutes"
       },
       {
-        "slug": "opera-house",
-        "name_ar": "دار الأوبرا",
-        "name_en": "Opera House"
+        "slug": "music-institute",
+        "name_ar": "معاهد موسيقية",
+        "name_en": "Music Institutes"
+      },
+      {
+        "slug": "libraries",
+        "name_ar": "مكتبات",
+        "name_en": "Libraries"
       }
     ]
   },
@@ -278,8 +288,13 @@
         "name_en": "Theaters"
       },
       {
+        "slug": "opera-house",
+        "name_ar": "دار الأوبرا",
+        "name_en": "Opera House"
+      },
+      {
         "slug": "malls",
-        "name_ar": "مراكز تسوق",
+        "name_ar": "مراكز التسوق (مولات)",
         "name_en": "Malls"
       }
     ]

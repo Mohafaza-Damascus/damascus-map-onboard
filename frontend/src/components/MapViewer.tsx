@@ -863,7 +863,7 @@ export default function MapViewer({
 
       if (maplibregl) {
         const startEl = document.createElement("div");
-        startEl.className = "pointer-events-auto cursor-pointer";
+        startEl.className = " cursor-pointer";
         startEl.innerHTML = `<div class="transition-transform duration-200 hover:scale-110" style="display:flex;flex-direction:column;align-items:center;"><div style="background-color:#10b981;color:#fff;border:2px solid #fff;box-shadow:0 8px 25px rgba(0,0,0,0.4);border-radius:9999px;padding:4px 10px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;white-space:nowrap;direction:rtl;"><span style="width:8px;height:8px;border-radius:50%;background-color:#fff;display:inline-block;"></span><span>انطلاق: ${line.start_terminal.name.split("/")[0]}</span></div><div style="width:2px;height:6px;background-color:#10b981;"></div><div style="width:12px;height:12px;border-radius:50%;background-color:#10b981;border:2.5px solid #fff;box-shadow:0 0 10px #10b981;"></div></div>`;
         transitMarkersRef.current.push(
           new maplibregl.Marker({ element: startEl, anchor: "bottom" })
@@ -2966,7 +2966,7 @@ export default function MapViewer({
 
       {/* 4. عناصر التحكم العائمة السفلية (المواصلات العامة والطبقات) في مكدس متناسق */}
       <div
-        className="fixed sm:absolute bottom-3 sm:bottom-6 right-3 sm:right-4 z-20 flex flex-col items-start gap-2 sm:gap-2.5 pb-safe pointer-events-none"
+        className="fixed sm:absolute sm:bottom-1 right-3 sm:right-4 z-20 flex flex-col items-start gap-2 sm:gap-2.5 pb-safe pointer-events-none"
         dir="rtl"
       >
         <UserLocationButton
@@ -3204,7 +3204,7 @@ export default function MapViewer({
       {/* 9. بطاقة الشارع المختار (Floating Street Banner) */}
       {selectedStreet && (
         <div
-          className="pointer-events-auto fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-md w-[calc(100%-2rem)] sm:w-auto bg-[#fdfbf7]/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-[#c8a76a]/40 p-3.5 sm:p-4 animate-in fade-in slide-in-from-bottom-4 duration-200"
+          className="pointer-events-auto fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-md w-[calc(100%-2rem)] sm:w-auto bg-[#fdfbf7]/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-[#c8a76a]/40 p-3.5 sm:p-4 animate-in fade-in slide-in-from-bottom-4 duration-200 translate-y-3"
           dir="rtl"
         >
           <div className="flex items-center justify-between gap-3">

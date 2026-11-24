@@ -4,7 +4,7 @@ from pathlib import Path
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from places.models import Category, SubCategory
+from places.models import Category, Place, SubCategory
 
 
 class Command(BaseCommand):
@@ -38,6 +38,25 @@ class Command(BaseCommand):
                 )
                 subcategories_created += created
                 subcategory_count += 1
+
+        legacy_subcategories = (
+            ('culture', 'cultural-center', 'culture', 'cultural-centers'),
+            ('culture', 'training-institute', 'culture', 'institues'),
+            ('culture', 'applied-arts', 'culture', 'institues'),
+            ('culture', 'opera-house', 'tourism', 'opera-house'),
+            ('public-facilities', 'opera-house', 'tourism', 'opera-house'),
+        )
+        for old_category, old_slug, new_category, new_slug in legacy_subcategories:
+            old = SubCategory.objects.filter(
+                category__slug=old_category, slug=old_slug
+            ).first()
+            if old is None:
+                continue
+            new = SubCategory.objects.get(
+                category__slug=new_category, slug=new_slug
+            )
+            Place.objects.filter(sub_category=old).update(sub_category=new)
+            old.delete()
 
         self.stdout.write(self.style.SUCCESS(
             f'Seeded {len(data)} categories ({categories_created} new) and '

@@ -19482,7 +19482,7 @@
         "pcode": null,
         "level": 9,
         "level_name": "بلدية",
-        "name_ar": "  ساروجا",
+        "name_ar": "  ساروجة",
         "name_en": "Sarouja Municipality",
         "parent_id": 27,
         "parent_name_ar": "دمشق",
@@ -28229,7 +28229,7 @@
         "name_ar": "حي العدوي",
         "name_en": "Al-Adawi",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13338557,
@@ -29446,7 +29446,7 @@
         "name_ar": "حي العقيبة",
         "name_en": "Al-Aqabiyah",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13338933,
@@ -29645,7 +29645,7 @@
         "name_ar": "حي العمارة البرانية",
         "name_en": "Al-Amara al-Barraniyya",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13338935,
@@ -33260,7 +33260,7 @@
         "name_ar": "حي القصاع",
         "name_en": "Al-Qassaa",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13337429,
@@ -33475,7 +33475,7 @@
         "name_ar": "حي القصور",
         "name_en": "Al-Qusour",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13338556,
@@ -52060,7 +52060,7 @@
         "name_ar": "حي ساروجة",
         "name_en": "Sarouja",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13338932,
@@ -53875,7 +53875,7 @@
         "name_ar": "حي فارس الخوري",
         "name_en": "Fares al-Khoury",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13337448,
@@ -59747,7 +59747,7 @@
         "name_ar": "حي مسجد الأقصاب",
         "name_en": "Masjid Aqsab",
         "parent_id": 364,
-        "parent_name_ar": "  ساروجا",
+        "parent_name_ar": "  ساروجة",
         "boundary_source": {
           "type": "osm_relation",
           "relation_id": 13338934,
@@ -62814,7 +62814,6 @@
       }
     }
   ],
-  "attribution": "© OpenStreetMap contributors",
   "license": "https://opendatacommons.org/licenses/odbl/1-0/",
   "boundary_revision": "2026-10-29-osm"
 }

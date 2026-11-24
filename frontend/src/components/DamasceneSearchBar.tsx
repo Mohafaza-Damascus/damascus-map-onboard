@@ -343,192 +343,250 @@ export default function DamasceneSearchBar({
 
   const adminCount = (counts.municipalities || 0) + (counts.neighborhoods || 0);
 
-  return (
-    <div ref={searchContainerRef} className="relative flex items-center gap-2 z-30" onKeyDown={(event) => {
+ 
+return (
+  <div
+    ref={searchContainerRef}
+    dir="rtl"
+    className={`relative z-30 flex shrink-0 items-center rounded-full border border-[#c8a76a]/60 bg-[#fdfbf7] shadow-sm transition-all duration-300 ease-in-out ${
+      isSearchOpen
+        ? 'w-64 sm:w-80 rounded-2xl'
+        : 'w-10 sm:w-11'
+    }`}
+    onKeyDown={(event) => {
       if (event.key === 'Escape') {
         setIsSearchOpen(false);
+        setIsOpen(false);
         searchButtonRef.current?.focus();
       }
-    }}>
-      <button ref={searchButtonRef} type="button" aria-label="بحث" title="بحث" aria-expanded={isSearchOpen} aria-controls="map-search-panel"
-        onClick={() => { setIsSearchOpen(!isSearchOpen); setIsOpen(query.trim().length >= 2); }}
-        className="flex size-10 sm:size-11 items-center justify-center rounded-full border border-[#c8a76a]/60 bg-[#fdfbf7] text-[#064239] shadow-sm transition-colors hover:bg-[#064239] hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8a76a]">
+    }}
+  >
+    {/* زر البحث: يتحول إلى زر إغلاق عند فتح البحث */}
+    <button
+      ref={searchButtonRef}
+      type="button"
+      aria-label={isSearchOpen ? 'إغلاق البحث' : 'بحث'}
+      title="بحث"
+      aria-expanded={isSearchOpen}
+      aria-controls="map-search-panel"
+      onClick={() => {
+        if (isSearchOpen) {
+          setIsSearchOpen(false);
+          setIsOpen(false);
+        } else {
+          setIsSearchOpen(true);
+          setIsOpen(query.trim().length >= 2);
+        }
+      }}
+      className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full text-[#064239] transition-colors hover:bg-[#064239] hover:text-white cursor-pointer"
+    >
+      {isSearchOpen ? (
+        <X className="w-5 h-5" />
+      ) : (
         <Search className="w-5 h-5" />
-      </button>
-      {isSearchOpen && <div id="map-search-panel" className="absolute left-0 top-full mt-3 w-[min(36rem,calc(100vw-2rem))]">
-      {/* شريط الإدخال الرئيسي */}
-      <div className="relative flex items-center bg-[#fdfbf7]/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#064239]/20 hover:border-[#064239]/40 focus-within:ring-2 focus-within:ring-[#064239]/20 focus-within:border-[#064239]/50 transition-all duration-200">
-        <div className="pr-4 pl-2 text-[#064239] dark:text-emerald-400">
-          {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin text-[#064239] dark:text-emerald-400" />
-          ) : (
-            <Search className="w-5 h-5 text-[#064239] dark:text-emerald-400" />
-          )}
-        </div>
+      )}
+    </button>
 
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (results.length > 0) setIsOpen(true);
+    {/* حقل البحث داخل نفس الكارد */}
+    <div
+      className={`flex min-w-0 flex-1 items-center overflow-hidden transition-opacity duration-200 ${
+        isSearchOpen
+          ? 'opacity-100'
+          : 'opacity-0 pointer-events-none'
+      }`}
+    >
+      <input
+        ref={inputRef}
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onFocus={() => {
+          if (results.length > 0) setIsOpen(true);
+        }}
+        placeholder="ابحث هنا..."
+        aria-label="البحث في بلديات وأحياء وشوارع ومعالم دمشق"
+        className="w-full min-w-0 bg-transparent px-2 py-2.5 text-sm font-semibold text-[#064239] placeholder:text-zinc-500/80 focus:outline-none"
+        dir="rtl"
+        tabIndex={isSearchOpen ? 0 : -1}
+      />
+
+      {loading && (
+        <Loader2 className="w-4 h-4 ml-2 shrink-0 animate-spin text-[#064239]" />
+      )}
+
+      {query && (
+        <button
+          type="button"
+          onClick={() => {
+            setQuery('');
+            setResults([]);
+            setGrouped({});
+            setCounts({ all: 0 });
+            setActiveTab('all');
+            setSelectedIndex(-1);
+            setIsOpen(false);
           }}
-          placeholder={placeholder || "ابحث عن بلدية، حي، شارع، منشأة، أو خط باص..."}
-          aria-label="البحث في بلديات وأحياء وشوارع ومعالم دمشق"
-          className="w-full py-2.5 sm:py-3.5 bg-transparent text-sm font-semibold text-[#064239] dark:text-zinc-100 placeholder:text-zinc-500/80 focus:outline-none text-right"
-          dir="rtl"
-        />
+          aria-label="مسح نص البحث"
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 cursor-pointer transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
 
-        {query && (
+    {/* قائمة النتائج المنسدلة */}
+    {isSearchOpen && isOpen && results.length > 0 && (
+      <div
+        id="map-search-panel"
+        className="absolute top-full right-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-2xl border border-[#064239]/15 overflow-hidden max-h-[60vh] sm:max-h-[70vh] flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
+        dir="rtl"
+      >
+        {/* تبويبات تصفية النتائج */}
+        <div className="flex items-center gap-1.5 p-2 border-b border-[#064239]/10 bg-[#f4eee1]/80 dark:bg-zinc-800/80 overflow-x-auto no-scrollbar shrink-0">
           <button
             type="button"
             onClick={() => {
-              setQuery('');
-              setResults([]);
-              setGrouped({});
-              setCounts({ all: 0 });
               setActiveTab('all');
               setSelectedIndex(-1);
-              setIsOpen(false);
             }}
-            aria-label="مسح نص البحث"
-            className="w-8 h-8 mx-1 text-zinc-400 hover:text-zinc-700 rounded-lg flex items-center justify-center cursor-pointer transition-colors"
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'all'
+                ? 'bg-[#064239] text-white shadow-xs'
+                : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
+            }`}
           >
-            <X className="w-4 h-4" />
+            الكل ({results.length})
           </button>
-        )}
-      </div>
 
-      {/* القائمة المنسدلة للنتائج المقترحة المنظمة */}
-      {isOpen && results.length > 0 && (
-        <div 
-          className="absolute top-full mt-1.5 sm:mt-2 w-full bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-2xl border border-[#064239]/15 overflow-hidden max-h-[60vh] sm:max-h-[70vh] flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
-          dir="rtl"
-        >
-          {/* تبويبات التصفية السريعة (Segmented Filter Tabs) لمنع فوضى النتائج */}
-          <div className="flex items-center gap-1.5 p-2 border-b border-[#064239]/10 bg-[#f4eee1]/80 dark:bg-zinc-800/80 backdrop-blur-xs overflow-x-auto no-scrollbar shrink-0">
+          {adminCount > 0 && (
             <button
               type="button"
-              onClick={() => { setActiveTab('all'); setSelectedIndex(-1); }}
+              onClick={() => {
+                setActiveTab('admin');
+                setSelectedIndex(-1);
+              }}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'all'
+                activeTab === 'admin'
                   ? 'bg-[#064239] text-white shadow-xs'
                   : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
               }`}
             >
-              الكل ({results.length})
+              البلديات والأحياء ({adminCount})
             </button>
+          )}
 
-            {adminCount > 0 && (
-              <button
-                type="button"
-                onClick={() => { setActiveTab('admin'); setSelectedIndex(-1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === 'admin'
-                    ? 'bg-[#064239] text-white shadow-xs'
-                    : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
-                }`}
-              >
-                البلديات والأحياء ({adminCount})
-              </button>
-            )}
+          {(counts.streets || 0) > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('streets');
+                setSelectedIndex(-1);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'streets'
+                  ? 'bg-[#064239] text-white shadow-xs'
+                  : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
+              }`}
+            >
+              الشوارع ({counts.streets})
+            </button>
+          )}
 
-            {(counts.streets || 0) > 0 && (
-              <button
-                type="button"
-                onClick={() => { setActiveTab('streets'); setSelectedIndex(-1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === 'streets'
-                    ? 'bg-[#064239] text-white shadow-xs'
-                    : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
-                }`}
-              >
-                الشوارع ({counts.streets})
-              </button>
-            )}
+          {(counts.places || 0) > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('places');
+                setSelectedIndex(-1);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'places'
+                  ? 'bg-[#064239] text-white shadow-xs'
+                  : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
+              }`}
+            >
+              المنشآت ({counts.places})
+            </button>
+          )}
 
-            {(counts.places || 0) > 0 && (
-              <button
-                type="button"
-                onClick={() => { setActiveTab('places'); setSelectedIndex(-1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === 'places'
-                    ? 'bg-[#064239] text-white shadow-xs'
-                    : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
-                }`}
-              >
-                المنشآت ({counts.places})
-              </button>
-            )}
-
-            {(counts.buses || 0) > 0 && (
-              <button
-                type="button"
-                onClick={() => { setActiveTab('buses'); setSelectedIndex(-1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === 'buses'
-                    ? 'bg-[#064239] text-white shadow-xs'
-                    : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
-                }`}
-              >
-                خطوط الباص ({counts.buses})
-              </button>
-            )}
-          </div>
-
-          {/* قائمة النتائج المصنفة */}
-          <div className="p-1.5 sm:p-2 space-y-1 overflow-y-auto overscroll-contain flex-1">
-            {filteredResults.map((item, idx) => {
-              const isSelected = selectedIndex === idx;
-              return (
-                <button
-                  key={`${item.type}-${item.id}-${idx}`}
-                  type="button"
-                  onClick={() => handleSelect(item)}
-                  onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl transition-all text-right cursor-pointer group min-h-[44px] ${
-                    isSelected 
-                      ? 'bg-[#ede5d3] dark:bg-zinc-800 shadow-xs ring-1 ring-[#064239]/20' 
-                      : 'hover:bg-[#f3eddf]/70 dark:hover:bg-zinc-800/60'
-                  }`}
-                >
-                  <div className="flex flex-1 items-center gap-2.5 sm:gap-3 min-w-0">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white dark:bg-zinc-800 border border-black/5 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-                      {getIcon(item)}
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-sm font-extrabold text-[#064239] dark:text-zinc-100 group-hover:text-[#04352e] dark:group-hover:text-emerald-300 whitespace-normal break-words">
-                        {renderHighlightedText(item.title, query)}
-                      </h4>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5 whitespace-normal break-words">
-                        {item.subtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 pr-2">
-                    {getBadge(item)}
-                    <Navigation className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600 group-hover:text-[#064239] dark:group-hover:text-emerald-400 transition-colors" />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          {(counts.buses || 0) > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('buses');
+                setSelectedIndex(-1);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'buses'
+                  ? 'bg-[#064239] text-white shadow-xs'
+                  : 'bg-white/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700'
+              }`}
+            >
+              خطوط الباص ({counts.buses})
+            </button>
+          )}
         </div>
-      )}
 
-      {/* حالة لا توجد نتائج */}
-      {isOpen && query.trim().length >= 2 && results.length === 0 && !loading && (
-        <div 
-          className="absolute top-full mt-2 w-full bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-xl border border-[#064239]/15 p-4 text-center text-sm font-medium text-zinc-500"
+        {/* عناصر النتائج */}
+        <div className="p-1.5 sm:p-2 space-y-1 overflow-y-auto overscroll-contain flex-1">
+          {filteredResults.map((item, idx) => {
+            const isSelected = selectedIndex === idx;
+
+            return (
+              <button
+                key={`${item.type}-${item.id}-${idx}`}
+                type="button"
+                onClick={() => handleSelect(item)}
+                onMouseEnter={() => setSelectedIndex(idx)}
+                className={`w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl transition-all text-right cursor-pointer group min-h-[44px] ${
+                  isSelected
+                    ? 'bg-[#ede5d3] dark:bg-zinc-800 shadow-xs ring-1 ring-[#064239]/20'
+                    : 'hover:bg-[#f3eddf]/70 dark:hover:bg-zinc-800/60'
+                }`}
+              >
+                <div className="flex flex-1 items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white dark:bg-zinc-800 border border-black/5 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                    {getIcon(item)}
+                  </div>
+
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-extrabold text-[#064239] dark:text-zinc-100 group-hover:text-[#04352e] dark:group-hover:text-emerald-300 whitespace-normal break-words">
+                      {renderHighlightedText(item.title, query)}
+                    </h4>
+
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5 whitespace-normal break-words">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 pr-2">
+                  {getBadge(item)}
+                  <Navigation className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600 group-hover:text-[#064239] dark:group-hover:text-emerald-400 transition-colors" />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+    {/* حالة عدم وجود نتائج */}
+    {isSearchOpen &&
+      isOpen &&
+      query.trim().length >= 2 &&
+      results.length === 0 &&
+      !loading && (
+        <div
+          id="map-search-panel"
+          className="absolute top-full right-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-xl border border-[#064239]/15 p-4 text-center text-sm font-medium text-zinc-500"
           dir="rtl"
         >
           لم يتم العثور على نتائج تطابق &quot;{query}&quot; في دمشق
         </div>
       )}
-      </div>}
-    </div>
-  );
+  </div>
+);
+
 }

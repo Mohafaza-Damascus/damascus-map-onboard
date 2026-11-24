@@ -16,19 +16,24 @@ class Command(BaseCommand):
         path = Path(__file__).resolve().parents[2] / 'data' / 'cultural_directorate.json'
         data = json.loads(path.read_text(encoding='utf-8'))
         directorate = SubCategory.objects.get(
-            category__slug='government', slug='central-directorates'
+            category__slug='damascus-governorate', slug='governorate-directorates'
         )
         culture = Category.objects.get(slug='culture')
         labels = {
-            'cultural-center': 'مراكز ثقافية',
-            'training-institute': 'معاهد الثقافة الشعبية',
-            'applied-arts': 'فنون تطبيقية',
+            'cultural-centers': 'مراكز ثقافية',
+            'institues': 'معاهد ثقافية',
             'music-institute': 'معاهد موسيقية',
         }
         categories = {
             slug: SubCategory.objects.get_or_create(
                 category=culture, slug=slug, defaults={'name_ar': label}
             )[0] for slug, label in labels.items()
+        }
+        source_categories = {
+            'cultural-center': 'cultural-centers',
+            'training-institute': 'institues',
+            'applied-arts': 'institues',
+            'music-institute': 'music-institute',
         }
         created = skipped = 0
 
@@ -45,7 +50,7 @@ class Command(BaseCommand):
                 title_ar=entry['title'],
                 defaults={
                     'sub_category': directorate if entry['subcategory'] == 'directorate'
-                    else categories[entry['subcategory']],
+                    else categories[source_categories[entry['subcategory']]],
                     'latitude': lat, 'longitude': lon,
                     'location_text': entry.get('address', ''),
                     'opening_hours': {'hours': entry['hours']} if entry.get('hours') else {},

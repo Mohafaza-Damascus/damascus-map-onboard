@@ -28,7 +28,7 @@ class Command(BaseCommand):
                     'latitude': lat,
                     'longitude': lon,
                     'description': '',
-                    'sector': 'private',
+                    'sector': entry.get('sector', 'private'),
                     'is_visible': True,
                     'is_verified': False,
                 },

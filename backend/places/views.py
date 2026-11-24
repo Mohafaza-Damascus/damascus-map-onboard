@@ -90,7 +90,10 @@ def list_place_sectors(request):
         'public-facilities', 'communications', 'economy', 'religious',
         'culture', 'tourism', 'damascus-governorate', 'government',
     }
-    if category in categories_without_sectors or (
+    if (
+        category in categories_without_sectors
+        and not (category == 'economy' and subcategory == 'banks')
+    ) or (
         category == 'healthcare' and subcategory in {'blood-banks', 'pharmacies'}
     ):
         return JsonResponse({"results": []})
@@ -98,7 +101,7 @@ def list_place_sectors(request):
     queryset = Place.objects.filter(is_visible=True, sub_category__slug=subcategory)
     if category:
         queryset = queryset.filter(sub_category__category__slug=category)
-    sectors = queryset.values_list('sector', flat=True).distinct()
+    sectors = queryset.order_by().values_list('sector', flat=True).distinct()
     results = [
         {"slug": sector.lower(), "label": sector_label(sector)}
         for sector in sectors

@@ -173,6 +173,7 @@ export default function PlaceDetailDrawer({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [closingPlaceId, setClosingPlaceId] = useState<number | null>(null);
   const localDay = useSyncExternalStore<number | null>(
     subscribeToLocalDay,
     () => new Date().getDay(),
@@ -203,9 +204,13 @@ export default function PlaceDetailDrawer({
     setActiveMediaIndex(0);
     setLightboxIndex(null);
     setIsScrolled(false);
+    setClosingPlaceId(null);
   }, [place?.id]);
 
   if (!place) return null;
+
+  const isClosing = closingPlaceId === place.id;
+  const handleClose = () => setClosingPlaceId(place.id);
 
   const handleShare = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -328,7 +333,18 @@ export default function PlaceDetailDrawer({
   return (
     <>
       <div
-        className="map-place-card z-50 bg-[#fdfbf7] dark:bg-zinc-900 shadow-2xl rounded-3xl border border-[#064239]/20 dark:border-white/10 flex flex-col overflow-hidden"
+        className={`map-place-card z-50 bg-[#fdfbf7] dark:bg-zinc-900 shadow-2xl rounded-3xl border border-[#064239]/20 dark:border-white/10 flex flex-col overflow-hidden ${isClosing ? "map-place-card-closing" : ""}`}
+        onAnimationEnd={(event) => {
+          if (
+            event.target !== event.currentTarget ||
+            event.animationName !== "place-card-exit" ||
+            !isClosing
+          ) {
+            return;
+          }
+          setClosingPlaceId(null);
+          onClose();
+        }}
         role="region"
         aria-label={`تفاصيل ${place.title}`}
         dir="rtl"
@@ -367,7 +383,7 @@ export default function PlaceDetailDrawer({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onClose();
+                handleClose();
               }}
               className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 text-zinc-700 dark:text-zinc-200 flex items-center justify-center transition-all cursor-pointer"
               title="إغلاق"
@@ -378,11 +394,11 @@ export default function PlaceDetailDrawer({
         </div>
         <div
           onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 100)}
-          className="min-h-0 overflow-y-auto flex-1 overscroll-contain"
+          className="map-place-card-content"
         >
           <div
             onClick={() => setLightboxIndex(activeMediaIndex)}
-            className="relative h-48 sm:h-56 w-full overflow-hidden shrink-0 bg-zinc-800 cursor-pointer group"
+           className="relative h-32 sm:h-50 w-full overflow-hidden shrink-0 bg-zinc-800 cursor-pointer group"
             title="انقر لفتح الصورة أو الفيديو بحجم كامل"
           >
             {activeMedia?.type === "video" ? (
@@ -438,7 +454,7 @@ export default function PlaceDetailDrawer({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onClose();
+                  handleClose();
                 }}
                 aria-label="إغلاق تفاصيل المكان"
                 className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-white active:scale-90 flex items-center justify-center transition-all cursor-pointer"
@@ -491,7 +507,7 @@ export default function PlaceDetailDrawer({
               ))}
             </div>
           )}
-          <div className="p-3.5 sm:p-4 space-y-3 pb-8">
+          <div className="p-3.5 sm:p-4 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">

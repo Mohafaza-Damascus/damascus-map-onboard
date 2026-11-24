@@ -1,6 +1,5 @@
 {
   "created_at": "2026-10-29",
-  "source": "OpenStreetMap",
   "osm_snapshot": "2026-10-29T05:55:37Z",
   "historical_snapshot": "2025-01-01T00:00:00Z",
   "changes": [
@@ -300,7 +299,7 @@
     },
     {
       "id": 364,
-      "name_ar": "  ساروجا",
+      "name_ar": "  ساروجة",
       "level": 9,
       "parent_id": null,
       "before_sha256": "ec6531bb09c3eb0ada7c35f7aa2d78b1817f78b7dbe8afcc0ec32f7d5860af6c",

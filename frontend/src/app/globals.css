@@ -308,6 +308,7 @@ body {
 .map-header-theme {
   position: absolute;
   left: 45px;
+  margin-top: 20px;
   bottom: max(20px, env(safe-area-inset-bottom, 0px));
 }
 
@@ -324,17 +325,37 @@ body {
 
 .map-place-card {
   --map-card-top: max(92px, calc(env(safe-area-inset-top, 0px) + 82px));
-  --map-card-bottom: max(17%, calc(max(20px, env(safe-area-inset-bottom, 0px)) + 52px));
+  --map-card-bottom: calc(180px + max(20px, env(safe-area-inset-bottom, 0px)));
+
   position: absolute;
   top: var(--map-card-top);
   left: 16px;
   right: auto;
-  bottom: auto;
+
   width: 380px;
   max-width: calc(100% - 32px);
+
   height: auto;
-  max-height: calc(100% - var(--map-card-top) - var(--map-card-bottom));
+  
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
   border-radius: 24px;
+  max-height: 515;
+}
+
+.map-place-card-content {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  
+}
+
+.map-place-card-content::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -343,9 +364,25 @@ body {
   }
 }
 
+.map-place-card-closing {
+  animation: place-card-exit 550ms ease-in forwards;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-place-card-closing {
+    animation-duration: 1ms;
+  }
+}
+
 @keyframes place-card-enter {
   from { transform: translateX(calc(-100% - 16px)); }
   to { transform: translateX(0); }
+}
+
+@keyframes place-card-exit {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - 16px)); }
 }
 
 .map-header-breadcrumb {

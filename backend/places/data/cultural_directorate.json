@@ -1,7 +1,7 @@
 {
   "source": "تقرير المنشآت التابعة للمديرية (1).pdf",
   "facilities": [
-    {"title":"مديرية الثقافة بدمشق","subcategory":"directorate","latitude":33.519942,"longitude":36.284264,"address":"أبو رمانة — شارع الجلاء — 46 — جانب مقسم هاتف الجلاء","phones":"3332834","hours":"08:30-15:00","email":"damascusculture@gmail.com","notes":"بريد إضافي كما ورد في التقرير: damasvcus@moc.gov.sy","page":1},
+    {"title":"مديرية الثقافة بدمشق","subcategory":"directorate","latitude":33.5199294,"longitude":36.2842336,"address":"أبو رمانة — شارع الجلاء — 46 — جانب مقسم هاتف الجلاء","phones":"3332834","hours":"08:30-15:00","email":"damascusculture@gmail.com","notes":"بريد إضافي كما ورد في التقرير: damasvcus@moc.gov.sy","page":1},
     {"title":"المركز الثقافي العربي بدمشق (أبو رمانة)","subcategory":"cultural-center","latitude":33.519942,"longitude":36.284264,"address":"أبو رمانة — شارع الجلاء — 46 — جانب مقسم هاتف الجلاء","phones":"3333727 - 3314425 - 3349758","hours":"09:00-20:00","services":"أنشطة ثقافية متنوعة للكبار والأطفال — مكتبة عامة ومكتبة أطفال — معارض","page":1},
     {"title":"معهد الثقافة الشعبية في الصالحية","subcategory":"training-institute","latitude":33.518959,"longitude":36.292670,"address":"الصالحية — شهداء — فوق محل أقمشة السكري","phones":"3345849 - 3312760","hours":"08:30-17:00","services":"دورات متنوعة: لغات، حاسوب، كروشيه","page":1},
     {"title":"المركز الثقافي العربي في المزة","subcategory":"cultural-center","latitude":33.4973734,"longitude":36.2447132,"address":"مزة — فيلات غربية — جانب فوج إطفاء المزة والفرن الآلي","phones":"6616456 - 6610678 - 6626439 - 6665630","hours":"09:00-20:00","services":"أنشطة ثقافية متنوعة للكبار والأطفال — مكتبة عامة ومكتبة أطفال — معارض","page":1},
