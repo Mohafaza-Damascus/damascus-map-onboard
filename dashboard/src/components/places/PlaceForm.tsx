@@ -26,9 +26,26 @@ const fieldMessage = (field: Field) => field.required && !field.value.trim() ? '
   : field.dataset.contactType ? contactMessage(field.dataset.contactType, field.value)
   : field.validity.typeMismatch ? 'أدخل رابطًا صحيحًا يبدأ بـ https://.'
   : !field.validity.valid ? 'أدخل قيمة صحيحة ضمن النطاق الموضح.' : ''
-export default function PlaceForm({ metadata, initial, onSaved, onCancel, savePlace = placesApi.save, uploadMedia, submission = false }: { metadata: Metadata; initial?: Place; onSaved: (place: Place) => void; onCancel?: () => void; savePlace?: (data: PlaceInput, id?: number) => Promise<Place>; uploadMedia?: (files: LocalMediaFile[]) => Promise<PlaceInput['media']>; submission?: boolean }) {
+export default function PlaceForm({ metadata, hierarchy, initial, onSaved, onCancel, savePlace = placesApi.save, uploadMedia, submission = false }: { metadata: Metadata; hierarchy?: { id: number; slug: string; parent_slug: string | null }[]; initial?: Place; onSaved: (place: Place) => void; onCancel?: () => void; savePlace?: (data: PlaceInput, id?: number) => Promise<Place>; uploadMedia?: (files: LocalMediaFile[]) => Promise<PlaceInput['media']>; submission?: boolean }) {
   const [form, setForm] = useState<PlaceInput>(initial ?? { title_ar: '', title_en: '', description: '', sector: 'Public', latitude: NaN, longitude: NaN, location_text: '', opening_hours: {}, is_visible: true, is_verified: false, sub_category_id: 0, admin_area_id: null, communication_info: [], media: [] })
   const [category, setCategory] = useState(initial?.category_id?.toString() ?? '')
+  const [categoryPath, setCategoryPath] = useState<number[]>([])
+  const subcategories = metadata.categories.find(c => String(c.id) === category)?.subcategories ?? []
+  const sectorInCategory = Boolean(hierarchy?.some(item => item.id === form.sub_category_id &&
+    ['public-health-centers', 'private-health-centers'].includes(item.slug)))
+  const levels: typeof subcategories[] = []
+  if (hierarchy) {
+    let parent: string | null = null
+    for (let depth = 0; depth <= subcategories.length; depth++) {
+      const options = subcategories.filter(sub => (hierarchy.find(item => item.id === sub.id)?.parent_slug ?? null) === parent)
+      if (!options.length) break
+      levels.push(options)
+      const selected = options.find(sub => sub.id === categoryPath[depth])
+      if (!selected) break
+      parent = hierarchy.find(item => item.id === selected.id)?.slug ?? null
+      if (!parent) break
+    }
+  }
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -91,9 +108,19 @@ export default function PlaceForm({ metadata, initial, onSaved, onCancel, savePl
         <h3 className="form-section-title"><span>1</span> المعلومات الأساسية</h3>
         <label>الاسم بالعربية *<input {...field('title_ar', 'الاسم بالعربية')} required maxLength={255} placeholder="مثال: صيدلية الشام" value={form.title_ar} onChange={e => set('title_ar', e.target.value)} />{hint('title_ar')}</label>
         <label>الاسم بالإنجليزية <span className="optional-label">اختياري</span><input maxLength={255} value={form.title_en} onChange={e => set('title_en', e.target.value)} /></label>
-        <label>الفئة الرئيسية *<select {...field('category', 'الفئة الرئيسية')} required value={category} onChange={e => { setCategory(e.target.value); set('sub_category_id', 0) }}><option value="">اختر الفئة</option>{metadata.categories.map(c => <option key={c.id} value={c.id}>{c.name_ar}</option>)}</select>{hint('category')}</label>
-        <label>الفئة الفرعية *<select {...field('sub_category_id', 'الفئة الفرعية')} required value={form.sub_category_id || ''} onChange={e => set('sub_category_id', Number(e.target.value))}><option value="">{category ? 'اختر الفئة الفرعية' : 'اختر الفئة الرئيسية أولًا'}</option>{metadata.categories.find(c => String(c.id) === category)?.subcategories.map(c => <option key={c.id} value={c.id}>{c.name_ar}</option>)}</select>{hint('sub_category_id')}</label>
-        <label>القطاع *<input {...field('sector', 'القطاع')} list="place-sectors" required maxLength={20} value={form.sector} onChange={e => set('sector', e.target.value)} /><datalist id="place-sectors">{metadata.sectors.map(s => <option key={s} value={s} />)}</datalist>{hint('sector')}<small className="form-hint">Public: عام · private: خاص · joint: مشترك</small></label>
+        <label>الفئة الرئيسية *<select {...field('category', 'الفئة الرئيسية')} required value={category} onChange={e => { setCategory(e.target.value); setCategoryPath([]); set('sub_category_id', 0) }}><option value="">اختر الفئة</option>{metadata.categories.map(c => <option key={c.id} value={c.id}>{c.name_ar}</option>)}</select>{hint('category')}</label>
+        {hierarchy ? levels.map((options, depth) => {
+          const label = depth === 0 ? 'الفئة الفرعية' : `التصنيف ضمن ${subcategories.find(sub => sub.id === categoryPath[depth - 1])?.name_ar}`
+          return <label key={`${category}-${depth}`}>{label} *<select {...field(`subcategory_${depth}`, label)} required value={categoryPath[depth] || ''} onChange={e => {
+            const id = Number(e.target.value)
+            setCategoryPath([...categoryPath.slice(0, depth), id])
+            const branch = hierarchy.find(item => item.id === id)
+            const hasChildren = branch && subcategories.some(sub => hierarchy.some(item => item.id === sub.id && item.parent_slug === branch.slug))
+            set('sub_category_id', hasChildren ? 0 : id)
+            if (branch && ['public-health-centers', 'private-health-centers'].includes(branch.slug)) set('sector', '')
+          }}><option value="">اختر التصنيف</option>{options.map(sub => <option key={sub.id} value={sub.id}>{sub.name_ar}</option>)}</select>{hint(`subcategory_${depth}`)}</label>
+        }) : <label>الفئة الفرعية *<select {...field('sub_category_id', 'الفئة الفرعية')} required value={form.sub_category_id || ''} onChange={e => set('sub_category_id', Number(e.target.value))}><option value="">{category ? 'اختر الفئة الفرعية' : 'اختر الفئة الرئيسية أولًا'}</option>{subcategories.map(c => <option key={c.id} value={c.id}>{c.name_ar}</option>)}</select>{hint('sub_category_id')}</label>}
+        {!sectorInCategory && <label>القطاع {hierarchy ? '(اختياري)' : '*'}<input {...field('sector', 'القطاع')} list="place-sectors" required={!hierarchy} maxLength={20} value={form.sector} onChange={e => set('sector', e.target.value)} /><datalist id="place-sectors">{metadata.sectors.map(s => <option key={s} value={s} />)}</datalist>{hint('sector')}<small className="form-hint">Public: عام · private: خاص · joint: مشترك</small></label>}
         <label>المنطقة الإدارية<select value={form.admin_area_id ?? ''} onChange={e => set('admin_area_id', e.target.value ? Number(e.target.value) : null)}><option value="">غير محددة</option>{metadata.admin_areas.map(a => <option key={a.id} value={a.id}>{a.name_ar}</option>)}</select></label>
         <label>الوصف<textarea value={form.description} onChange={e => set('description', e.target.value)} /></label>
         <label>العنوان<input maxLength={255} value={form.location_text} onChange={e => set('location_text', e.target.value)} /></label>

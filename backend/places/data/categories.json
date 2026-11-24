@@ -241,7 +241,7 @@
     "subcategories": [
       {
         "slug": "hospitals",
-        "name_ar": "مستشفيات",
+        "name_ar": "المستشفيات",
         "name_en": "Hospitals"
       },
       {
@@ -251,13 +251,43 @@
       },
       {
         "slug": "health-centers",
-        "name_ar": "مراكز صحية",
+        "name_ar": "المراكز الصحية",
         "name_en": "Health Centers"
       },
       {
         "slug": "pharmacies",
-        "name_ar": "صيدليات",
+        "name_ar": "الصيدليات",
         "name_en": "Pharmacies"
+      },
+      {
+        "slug": "dispensaries",
+        "name_ar": "مستوصفات",
+        "name_en": "Dispensaries",
+        "parent": "health-centers"
+      },
+      {
+        "slug": "private-health-centers",
+        "name_ar": "مراكز صحية خاصة",
+        "name_en": "Private Health Centers",
+        "parent": "health-centers"
+      },
+      {
+        "slug": "public-health-centers",
+        "name_ar": "مراكز صحية عامة",
+        "name_en": "Public Health Centers",
+        "parent": "health-centers"
+      },
+      {
+        "slug": "medical-laboratories",
+        "name_ar": "مخابر التحليل",
+        "name_en": "Medical Laboratories",
+        "parent": "health-centers"
+      },
+      {
+        "slug": "radiology-centers",
+        "name_ar": "مراكز الاشعة",
+        "name_en": "Radiology Centers",
+        "parent": "health-centers"
       }
     ]
   },

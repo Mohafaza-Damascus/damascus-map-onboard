@@ -86,6 +86,9 @@ def list_place_sectors(request):
     if not subcategory:
         return JsonResponse({"results": []})
 
+    if SubCategory.objects.filter(parent__slug=subcategory, category__slug=category).exists():
+        return JsonResponse({"results": []})
+
     categories_without_sectors = {
         'public-facilities', 'communications', 'economy', 'religious',
         'culture', 'tourism', 'damascus-governorate', 'government',

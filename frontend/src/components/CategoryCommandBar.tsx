@@ -40,7 +40,7 @@ export default function CategoryCommandBar({
   onSelectSector,
 }: CategoryCommandBarProps) {
   const displayCategories = categories;
-  const uniqueSectors = Array.from(
+  const availableSectors = Array.from(
     new Map(sectors.map((sector) => [sector.slug, sector])).values(),
   );
   const activeCategory = categories.find(
@@ -55,6 +55,7 @@ export default function CategoryCommandBar({
   const visibleSubcategories = activeCategory?.subcategories?.filter(
     (sub) => parentSlug ? sub.parent_slug === parentSlug : !sub.parent_slug,
   );
+  const uniqueSectors = parentSlug === selectedSubcategorySlug ? [] : availableSectors;
   const subScrollRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
 
@@ -185,7 +186,7 @@ export default function CategoryCommandBar({
                   {selectedSubcategorySlug === parentSlug && (
                     <Check className="w-3.5 h-3.5 text-[#ecc988]" />
                   )}
-                  <span>{parentSlug ? "كل فروع الجامعة" : "الكل"}</span>
+                  <span>الكل</span>
                 </button>
               )}
               {(!selectedSubcategorySlug || uniqueSectors.length === 0) &&
