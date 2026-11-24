@@ -88,9 +88,12 @@ def list_place_sectors(request):
 
     categories_without_sectors = {
         'public-facilities', 'communications', 'economy', 'religious',
-        'culture', 'damascus-governorate', 'government',
+        'culture', 'tourism', 'damascus-governorate', 'government',
     }
-    if category in categories_without_sectors or (
+    if (
+        category in categories_without_sectors
+        and not (category == 'economy' and subcategory == 'banks')
+    ) or (
         category == 'healthcare' and subcategory in {'blood-banks', 'pharmacies'}
     ):
         return JsonResponse({"results": []})
@@ -98,7 +101,7 @@ def list_place_sectors(request):
     queryset = Place.objects.filter(is_visible=True, sub_category__slug=subcategory)
     if category:
         queryset = queryset.filter(sub_category__category__slug=category)
-    sectors = queryset.values_list('sector', flat=True).distinct()
+    sectors = queryset.order_by().values_list('sector', flat=True).distinct()
     results = [
         {"slug": sector.lower(), "label": sector_label(sector)}
         for sector in sectors
@@ -685,10 +688,10 @@ def calculate_route(request):
 
     mode = request.GET.get('mode', 'transit').lower()
     routing_engine = request.GET.get('engine', settings.ROUTING_ENGINE).lower()
-    if routing_engine not in ('brouter', 'database'):
+    if routing_engine not in ('brouter', 'database', 'auto'):
         return JsonResponse({'error': 'Invalid routing engine', 'code': 'invalid_engine'}, status=400)
     database_route = None
-    if routing_engine == 'database' and mode in ('car', 'walk'):
+    if routing_engine in ('database', 'auto') and mode in ('car', 'walk'):
         from .database_routing_service import calculate_database_route, DatabaseRoutingError
 
         try:
@@ -699,14 +702,20 @@ def calculate_route(request):
         except DatabaseRoutingError as exc:
             status = (400 if exc.code in ('invalid_coordinates', 'invalid_mode') else
                       422 if exc.code in ('no_nearby_edge', 'no_route', 'empty_route') else 502)
-            return JsonResponse({'error': str(exc), 'code': exc.code}, status=status)
+            if routing_engine != 'auto' or exc.code not in ('no_nearby_edge', 'no_route'):
+                return JsonResponse({'error': str(exc), 'code': exc.code}, status=status)
         except DatabaseError:
             return JsonResponse({'error': 'خدمة التوجيه غير متاحة', 'code': 'engine_unavailable'}, status=503)
 
     if mode == 'car':
+        # The terminal pin is on an isolated segment in BRouter's driving graph.
+        # Route cars to the connected approach road while keeping the POI at the terminal.
+        car_end = {'lon': end_lon, 'lat': end_lat}
+        if abs(end_lon - 36.513339) < 0.00001 and abs(end_lat - 33.412028) < 0.00001:
+            car_end = {'lon': 36.511584, 'lat': 33.412197}
         try:
-            route = database_route if routing_engine == 'database' else calculate_car_route(
-                [{'lon': start_lon, 'lat': start_lat}, {'lon': end_lon, 'lat': end_lat}],
+            route = database_route or calculate_car_route(
+                [{'lon': start_lon, 'lat': start_lat}, car_end],
                 enforce_damascus=True,
             )
         except RoutingError as exc:
@@ -729,7 +738,7 @@ def calculate_route(request):
     # 1. وضع المواصلات العامة (Transit)
     if mode == 'transit':
         from .database_routing_service import DatabaseRoutingError
-        if routing_engine == 'database':
+        if routing_engine in ('database', 'auto'):
             from .database_transit_routing_service import calculate_database_transit_route
             calculate_transit = calculate_database_transit_route
         else:
@@ -841,7 +850,7 @@ def calculate_route(request):
 
     # 3. وضع المشي على الأقدام (Walk)
     try:
-        route = database_route if routing_engine == 'database' else calculate_walking_route(
+        route = database_route or calculate_walking_route(
             [{'lon': start_lon, 'lat': start_lat}, {'lon': end_lon, 'lat': end_lat}],
         )
     except RoutingError as exc:

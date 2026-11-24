@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { MapLayerMouseEvent } from "maplibre-gl";
+import type { MapLayerMouseEvent, SymbolLayerSpecification } from "maplibre-gl";
 import { ThemeKey, THEMES, applyThemeToMap } from "@/lib/map-themes";
 import DamasceneSearchBar, { SearchResultItem } from "./DamasceneSearchBar";
 import CategoryCommandBar from "./CategoryCommandBar";
@@ -21,7 +21,7 @@ import RoutingPanel from "./RoutingPanel";
 import type { RouteResult } from "@/lib/routing-api";
 import TransitDrawer, { TransitLine, TransitStop } from "./TransitDrawer";
 import { getApiBaseUrl, getAssetUrl, getAssetPath } from "@/lib/api-config";
-import { getFeatureBounds, getChildNeighborhoods } from "@/lib/geo-utils";
+import { getFeatureBounds, getChildNeighborhoods, labelAreaMask } from "@/lib/geo-utils";
 import {
   setupLandmarkLayers,
   LandmarkSelectPayload,
@@ -33,9 +33,7 @@ import {
 } from "@/lib/poi-marker-icons";
 import {
   Palette,
-  ChevronDown,
   ChevronLeft,
-  Check,
   EyeOff,
   Hospital,
   GraduationCap,
@@ -88,16 +86,16 @@ export default function MapViewer({
 }: MapViewerProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const basemapLabels = useRef<SymbolLayerSpecification[]>([]);
+  const maskedLabels = useRef(new Set<string>());
   const routingMarkersRef = useRef<any[]>([]);
   const poiRequestRef = useRef<AbortController | null>(null);
   const clearPoiHoverRef = useRef(() => {});
   const [loading, setLoading] = useState(true);
   const userLocation = useUserLocation(loading ? null : mapInstanceRef.current);
   const [activeTheme, setActiveTheme] = useState<ThemeKey>("classic");
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isThreeDNoticeOpen, setIsThreeDNoticeOpen] = useState(false);
   const [mapViewMode, setMapViewMode] = useState<"2d" | "3d">("2d");
-  const themeMenuRef = useRef<HTMLDivElement>(null);
   const closeThreeDNotice = () => {
     setIsThreeDNoticeOpen(false);
     setMapViewMode("2d");
@@ -413,19 +411,6 @@ export default function MapViewer({
   );
   const routePickModeRef = useRef<"destination" | null>(null);
   routePickModeRef.current = routePickMode;
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        themeMenuRef.current &&
-        !themeMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsThemeMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   useEffect(() => {
     fetch(`${getApiBaseUrl()}/categories/`)
@@ -878,7 +863,7 @@ export default function MapViewer({
 
       if (maplibregl) {
         const startEl = document.createElement("div");
-        startEl.className = "pointer-events-auto cursor-pointer";
+        startEl.className = " cursor-pointer";
         startEl.innerHTML = `<div class="transition-transform duration-200 hover:scale-110" style="display:flex;flex-direction:column;align-items:center;"><div style="background-color:#10b981;color:#fff;border:2px solid #fff;box-shadow:0 8px 25px rgba(0,0,0,0.4);border-radius:9999px;padding:4px 10px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;white-space:nowrap;direction:rtl;"><span style="width:8px;height:8px;border-radius:50%;background-color:#fff;display:inline-block;"></span><span>انطلاق: ${line.start_terminal.name.split("/")[0]}</span></div><div style="width:2px;height:6px;background-color:#10b981;"></div><div style="width:12px;height:12px;border-radius:50%;background-color:#10b981;border:2.5px solid #fff;box-shadow:0 0 10px #10b981;"></div></div>`;
         transitMarkersRef.current.push(
           new maplibregl.Marker({ element: startEl, anchor: "bottom" })
@@ -1139,6 +1124,9 @@ export default function MapViewer({
       try {
         const res = await fetch(getAssetUrl("/damascus-clean-style.json?v=2"));
         const style = useDatabaseMapData(await res.json(), getApiBaseUrl());
+        basemapLabels.current = style.layers.filter((layer): layer is SymbolLayerSpecification =>
+          layer.type === "symbol" && Boolean(layer.layout?.["text-field"]) && layer.layout?.visibility !== "none"
+        );
 
         if (style.sources.openmaptiles?.type === "vector") {
           style.sources.openmaptiles.tiles = [
@@ -1735,7 +1723,6 @@ export default function MapViewer({
           if (!isMounted || isReadyFired) return;
           isReadyFired = true;
 
-          applyThemeToMap(map, "classic");
           setupAdminLayers();
           map.on("movestart", (event: any) => {
             if (event.originalEvent) userLocation.stopFollowing();
@@ -1783,12 +1770,9 @@ export default function MapViewer({
   }, []); // مصفوفة فارغة لضمان عدم إعادة إنشاء الخريطة نهائياً عند تغيير أي حالة
 
   // التبديل اللحظي للنمط اللوني عند طلب المستخدم حصراً
-  const handleSelectTheme = (themeKey: ThemeKey) => {
-    setActiveTheme(themeKey);
-    if (mapInstanceRef.current && mapInstanceRef.current.isStyleLoaded()) {
-      applyThemeToMap(mapInstanceRef.current, themeKey);
-    }
-  };
+  useEffect(() => {
+    if (!loading) applyThemeToMap(mapInstanceRef.current, activeTheme);
+  }, [loading, activeTheme]);
 
   // التحكم بظهور وفلترة طبقات التقسيمات الإدارية الذكية وفق التسلسل الهرمي
   useEffect(() => {
@@ -1866,9 +1850,57 @@ export default function MapViewer({
           : ["==", ["get", "id"], -1],
       );
     }
+    const municipalities = adminFeatures.filter(({ properties: p }) =>
+      p.level === 9 && (selectedMunicipality ? p.id === selectedMunicipality.id : !activeAdminSector || p.parent_id === activeAdminSector.id)
+    );
+    const municipalityIds = new Set(municipalities.map(f => f.properties.id));
+    const areasByLevel = [
+      adminFeatures.filter(f => f.properties.level === 8),
+      municipalities,
+      adminFeatures.filter(({ properties: p }) =>
+        p.level === 10 && ((!selectedMunicipality && !activeAdminSector) || municipalityIds.has(p.parent_id))
+      ),
+    ];
+    let previousLevel: number | undefined;
+    let applyBatch: (() => void) | undefined;
+    const cancelBatch = () => {
+      if (applyBatch) map.off("idle", applyBatch);
+      applyBatch = undefined;
+    };
     const syncZoomVisibility = () => {
       const zoom = map.getZoom();
       const showNeighborhoods = showBoundaries && zoom >= 13 && zoom < 14;
+      const level = !showBoundaries || zoom >= 14 ? -1 : zoom < 12 ? 0 : zoom < 13 ? 1 : 2;
+      if (level !== previousLevel) {
+        previousLevel = level;
+        cancelBatch();
+        const areas = areasByLevel[level];
+        if (!areas?.length) {
+          for (const layer of basemapLabels.current) {
+            if (maskedLabels.current.delete(layer.id))
+              map.setLayoutProperty(layer.id, "text-field", layer.layout!["text-field"]);
+          }
+        } else {
+          const minZoom = level === 0 ? map.getMinZoom() : 11 + level;
+          const pending = basemapLabels.current.filter(layer =>
+            (layer.minzoom ?? 0) < 12 + level && (layer.maxzoom ?? Infinity) > minZoom
+          ).reverse();
+          let mask: ReturnType<typeof labelAreaMask>;
+          applyBatch = () => {
+            mask ??= labelAreaMask(areas);
+            for (const layer of pending.splice(0, 3)) {
+              map.setLayoutProperty(layer.id, "text-field", ["case", mask, "", layer.layout!["text-field"]]);
+              maskedLabels.current.add(layer.id);
+            }
+            if (pending.length) {
+              map.once("idle", applyBatch);
+              map.triggerRepaint();
+            }
+          };
+          map.once("idle", applyBatch);
+          map.triggerRepaint();
+        }
+      }
       setVisible(["admin-sectors-fill", "admin-sectors-line", "admin-sectors-label"], showBoundaries && zoom < 12);
       setVisible(municipalityLayers, showBoundaries && zoom >= 12 && zoom < 13);
       setVisible(neighborhoodLayers, showNeighborhoods);
@@ -1879,7 +1911,10 @@ export default function MapViewer({
     };
     syncZoomVisibility();
     map.on("zoom", syncZoomVisibility);
-    return () => map.off("zoom", syncZoomVisibility);
+    return () => {
+      cancelBatch();
+      map.off("zoom", syncZoomVisibility);
+    };
   }, [
     loading,
     showAdminAreas,
@@ -2656,7 +2691,7 @@ export default function MapViewer({
 
   return (
     <div
-      className="relative w-full h-screen overflow-hidden"
+      className="relative w-full h-dvh overflow-hidden"
       style={{ backgroundColor: "#f7f4ed" }}
     >
       {/* 1. حاوية الخريطة بملء الشاشة */}
@@ -2729,114 +2764,53 @@ export default function MapViewer({
         <span>الرئيسية</span>
       </a>
 
-      {/* اليسار: قائمة منسدلة أنيقة للهوية البصرية (Popover Menu) */}
       <div
-        ref={themeMenuRef}
-        className="map-header-theme z-30 flex flex-col items-start gap-2"
+        className="map-header-theme z-[51] flex items-center gap-1 rounded-2xl border border-[#064239]/10 bg-[#fdfbf7]/90 p-1 shadow-lg"
         dir="rtl"
+        role="group"
+        aria-label="عرض الخريطة وهويتها"
       >
         <button
           type="button"
-          onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-          className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-3 sm:py-2.5 bg-[#fdfbf7] shadow-lg rounded-2xl border border-[#064239]/10 hover:bg-white text-xs font-bold text-[#064239] transition-all cursor-pointer active:scale-95 h-11"
-          aria-label="تغيير الهوية البصرية للخريطة"
-          aria-expanded={isThemeMenuOpen}
-          title="تغيير الهوية البصرية للخريطة"
+          onClick={() => setActiveTheme(theme => theme === "classic" ? "governorate" : "classic")}
+          aria-label="تفعيل هوية المحافظة"
+          aria-pressed={activeTheme === "governorate"}
+          title={`تبديل الهوية — الحالية: ${currentTheme.label}`}
+          className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-bold text-[#064239] hover:bg-[#f3eddf] cursor-pointer"
         >
-          <Palette className="w-4 h-4 text-[#c8a76a]" />
-          <span className="hidden md:inline text-[11px] text-zinc-500">
-            الهوية:
-          </span>
-          <span className="flex items-center gap-1">
-            <span
-              className="w-2.5 h-2.5 rounded-full inline-block shadow-xs border border-black/15"
-              style={{ backgroundColor: currentTheme?.dotColor || "#3a6962" }}
-            />
-            <span className="font-extrabold text-xs hidden md:inline">
-              {currentTheme.label}
-            </span>
-          </span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isThemeMenuOpen ? "rotate-180" : ""}`}
-          />
+          <Palette className="h-4 w-4" style={{ color: currentTheme.dotColor }} />
+          <span className="hidden sm:inline">{currentTheme.label}</span>
         </button>
-
-        <div
-          className="flex items-center gap-1 rounded-2xl border border-[#064239]/10 bg-[#fdfbf7]/90 p-1 shadow-lg"
-          role="group"
-          aria-label="اختيار نمط عرض الخريطة"
+        <Box className="mx-1 h-4 w-4 text-[#c8a76a]" aria-hidden="true" />
+        <button
+          type="button"
+          onClick={() => setMapViewMode("2d")}
+          className={`rounded-xl px-2.5 py-1.5 text-[11px] font-black transition-all cursor-pointer active:scale-95 ${
+            mapViewMode === "2d"
+              ? "bg-[#064239] text-white shadow-sm"
+              : "text-[#064239] hover:bg-[#f3eddf]"
+          }`}
+          aria-pressed={mapViewMode === "2d"}
+          title="العرض ثنائي الأبعاد"
         >
-          <Box className="mx-1 h-4 w-4 text-[#c8a76a]" aria-hidden="true" />
-          <button
-            type="button"
-            onClick={() => setMapViewMode("2d")}
-            className={`rounded-xl px-2.5 py-1.5 text-[11px] font-black transition-all cursor-pointer active:scale-95 ${
-              mapViewMode === "2d"
-                ? "bg-[#064239] text-white shadow-sm"
-                : "text-[#064239] hover:bg-[#f3eddf]"
-            }`}
-            aria-pressed={mapViewMode === "2d"}
-            title="العرض ثنائي الأبعاد"
-          >
-            2D
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMapViewMode("2d");
-              setIsThreeDNoticeOpen(true);
-            }}
-            className={`rounded-xl px-2.5 py-1.5 text-[11px] font-black transition-all cursor-pointer active:scale-95 ${
-              mapViewMode === "3d"
-                ? "bg-[#c8a76a] text-[#064239] shadow-sm"
-                : "text-[#064239] hover:bg-[#f3eddf]"
-            }`}
-            aria-pressed={mapViewMode === "3d"}
-            title="العرض ثلاثي الأبعاد"
-          >
-            3D
-          </button>
-        </div>
-
-        {/* القائمة المنبثقة للهويات */}
-        {isThemeMenuOpen && (
-          <div
-            className="absolute left-0 bottom-full mb-2 w-56 sm:w-64 max-h-[65vh] overflow-y-auto bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-2xl border border-[#064239]/15 p-2 space-y-1 z-50 animate-in fade-in duration-150"
-            dir="rtl"
-          >
-            <div className="px-3 py-1.5 border-b border-black/5 text-[11px] font-bold text-zinc-400">
-              الهوية البصرية المعتمدة
-            </div>
-            {(["classic", "governorate"] as ThemeKey[]).map((key) => {
-              const item = THEMES[key];
-              const isActive = activeTheme === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => {
-                    handleSelectTheme(key);
-                    setIsThemeMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-[#064239] text-white shadow-xs"
-                      : "hover:bg-[#f3eddf]/70 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-200 dark:hover:text-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-3 h-3 rounded-full border border-black/20 shrink-0"
-                      style={{ backgroundColor: item.dotColor }}
-                    />
-                    <span>{item.label}</span>
-                  </div>
-                  {isActive && <Check className="w-4 h-4 text-[#c8a76a]" />}
-                </button>
-              );
-            })}
-          </div>
-        )}
+          2D
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setMapViewMode("2d");
+            setIsThreeDNoticeOpen(true);
+          }}
+          className={`rounded-xl px-2.5 py-1.5 text-[11px] font-black transition-all cursor-pointer active:scale-95 ${
+            mapViewMode === "3d"
+              ? "bg-[#c8a76a] text-[#064239] shadow-sm"
+              : "text-[#064239] hover:bg-[#f3eddf]"
+          }`}
+          aria-pressed={mapViewMode === "3d"}
+          title="العرض ثلاثي الأبعاد"
+        >
+          3D
+        </button>
       </div>
 
       {isThreeDNoticeOpen && (
@@ -2992,7 +2966,7 @@ export default function MapViewer({
 
       {/* 4. عناصر التحكم العائمة السفلية (المواصلات العامة والطبقات) في مكدس متناسق */}
       <div
-        className="fixed sm:absolute bottom-3 sm:bottom-6 right-3 sm:right-4 z-20 flex flex-col items-start gap-2 sm:gap-2.5 pb-safe pointer-events-none"
+        className="fixed sm:absolute sm:bottom-1 right-3 sm:right-4 z-20 flex flex-col items-start gap-2 sm:gap-2.5 pb-safe pointer-events-none"
         dir="rtl"
       >
         <UserLocationButton
@@ -3002,14 +2976,6 @@ export default function MapViewer({
             void userLocation.locateAndFollow().catch(() => undefined);
           }}
         />
-        <button
-          type="button"
-          onClick={() => setRoutePickMode("destination")}
-          className="pointer-events-auto rounded-2xl border border-[#064239]/20 bg-[#fdfbf7] px-3 py-2 text-xs font-bold text-[#064239] shadow-lg"
-          aria-label="اختر الوجهة من الخريطة"
-        >
-          اختر وجهة
-        </button>
         {routePickMode && (
           <span className="rounded-xl bg-[#064239] px-3 py-2 text-xs font-bold text-white">
             انقر على الخريطة لاختيار الوجهة
@@ -3238,7 +3204,7 @@ export default function MapViewer({
       {/* 9. بطاقة الشارع المختار (Floating Street Banner) */}
       {selectedStreet && (
         <div
-          className="pointer-events-auto fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-md w-[calc(100%-2rem)] sm:w-auto bg-[#fdfbf7]/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-[#c8a76a]/40 p-3.5 sm:p-4 animate-in fade-in slide-in-from-bottom-4 duration-200"
+          className="pointer-events-auto fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-md w-[calc(100%-2rem)] sm:w-auto bg-[#fdfbf7]/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-[#c8a76a]/40 p-3.5 sm:p-4 animate-in fade-in slide-in-from-bottom-4 duration-200 translate-y-3"
           dir="rtl"
         >
           <div className="flex items-center justify-between gap-3">

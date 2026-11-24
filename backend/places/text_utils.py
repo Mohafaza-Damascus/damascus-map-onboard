@@ -101,11 +101,11 @@ def generate_search_variants(query: str) -> list[str]:
         elif 'مشفي' in v:
             variants.add(v.replace('مشفي', 'مستشفي'))
 
-    # 3. معالجة ساروجة / ساروجا / ساروحه
+    # 3. معالجة ساروجة / ساروجة / ساروحه
     for v in list(variants):
-        if any(w in v for w in ['ساروجه', 'ساروجا', 'ساروحه']):
+        if any(w in v for w in ['ساروجه', 'ساروجة', 'ساروحه']):
             variants.add('ساروجه')
-            variants.add('ساروجا')
+            variants.add('ساروجة')
             variants.add('ساروج')
 
     # 4. معالجة الكلمات المركبة (دمج وفصل المسافات وإضافة/حذف التعريف للجزء الثاني)

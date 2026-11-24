@@ -2,31 +2,55 @@
   {
     "name": "بنك سورية الدولي الإسلامي",
     "map_url": "https://maps.app.goo.gl/pwL65EVWuS9Vwk44A?g_st=aw",
-    "coordinates": [33.5060987, 36.262731]
+    "coordinates": [33.5060987, 36.262731],
+    "sector": "private"
   },
   {
     "name": "بنك سوريا والمهجر",
     "map_url": "https://maps.app.goo.gl/YNXgbk35MidNERxF6?g_st=aw",
-    "coordinates": [33.494457, 36.2917256]
+    "coordinates": [33.494457, 36.2917256],
+    "sector": "private"
   },
   {
     "name": "بنك سوريا والخليج",
     "map_url": "https://maps.app.goo.gl/rF1b3DYM4bGNBGR29?g_st=aw",
-    "coordinates": [33.5099743, 36.3019631]
+    "coordinates": [33.5099743, 36.3019631],
+    "sector": "private"
   },
   {
     "name": "بنك البركة - سورية",
     "map_url": "https://maps.app.goo.gl/Txgwy1HzJPft2txP7?g_st=aw",
-    "coordinates": [33.490156, 36.2925671]
+    "coordinates": [33.490156, 36.2925671],
+    "sector": "private"
   },
   {
     "name": "بنك بيمو السعودي الفرنسي",
     "map_url": "https://maps.app.goo.gl/gg8B5LCVsFVWE8RW9?g_st=aw",
-    "coordinates": [33.5047263, 36.2614961]
+    "coordinates": [33.5047263, 36.2614961],
+    "sector": "private"
   },
   {
     "name": "بنك الشرق",
     "map_url": "https://maps.app.goo.gl/WhAVKaN6jBjaay9V8?g_st=aw",
-    "coordinates": [33.5187312, 36.2725911]
+    "coordinates": [33.5187312, 36.2725911],
+    "sector": "private"
+  },
+  {
+    "name": "المصرف العقاري السوري",
+    "map_url": "https://maps.app.goo.gl/bN3oyCQqVF9CCfam6",
+    "coordinates": [33.5171338, 36.2952607],
+    "sector": "Public"
+  },
+  {
+    "name": "المصرف التجاري السوري",
+    "map_url": "https://maps.app.goo.gl/GgouppJub5z1XGvv7",
+    "coordinates": [33.51631, 36.2947378],
+    "sector": "Public"
+  },
+  {
+    "name": "المصرف التجاري السوري - الفرع الخامس",
+    "map_url": "https://maps.app.goo.gl/wL482iJghZVVHN329",
+    "coordinates": [33.5130808, 36.2954988],
+    "sector": "Public"
   }
 ]

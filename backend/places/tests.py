@@ -131,6 +131,48 @@ class DamascusPlacesModelAndApiTests(TestCase):
         healthcare = next(c for c in data["results"] if c["slug"] == "healthcare")
         self.assertEqual(healthcare["places_count"], 1)
 
+    def test_bank_sector_api_returns_public_and_private_sectors(self):
+        economy = Category.objects.create(
+            name_ar="اقتصاد", name_en="Economy", slug="economy"
+        )
+        banks = SubCategory.objects.create(
+            category=economy, name_ar="البنوك", name_en="Banks", slug="banks"
+        )
+        atms = SubCategory.objects.create(
+            category=economy, name_ar="الصرافات", name_en="ATMs", slug="atm"
+        )
+        for title, subcategory, sector in (
+            ("بنك خاص تجريبي", banks, "private"),
+            ("بنك عام تجريبي", banks, "Public"),
+            ("صراف تجريبي", atms, "private"),
+        ):
+            Place.objects.create(
+                title_ar=title,
+                sub_category=subcategory,
+                sector=sector,
+                latitude=33.5123,
+                longitude=36.2712,
+            )
+
+        response = self.client.get(
+            reverse('place_sectors'),
+            {'category': 'economy', 'subcategory': 'banks'},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertCountEqual(
+            response.json()['results'],
+            [
+                {'slug': 'private', 'label': 'قطاع خاص'},
+                {'slug': 'public', 'label': 'قطاع عام / حكومي'},
+            ],
+        )
+
+        atm_response = self.client.get(
+            reverse('place_sectors'),
+            {'category': 'economy', 'subcategory': 'atm'},
+        )
+        self.assertEqual(atm_response.json()['results'], [])
+
     def test_list_places_geojson_api(self):
         """فحص واجهة نقاط الخريطة GeoJSON وفلترة التصنيف"""
         response = self.client.get(reverse('places_geojson') + '?categories=healthcare')

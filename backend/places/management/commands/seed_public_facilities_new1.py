@@ -15,8 +15,8 @@ class Command(BaseCommand):
         path = Path(__file__).resolve().parents[2] / 'data' / 'public_facilities_new1.json'
         entries = json.loads(path.read_text(encoding='utf-8'))
         subcategories = {
-            sub.slug: sub for sub in SubCategory.objects.filter(
-                category__slug='public-facilities',
+            (sub.category.slug, sub.slug): sub for sub in SubCategory.objects.select_related('category').filter(
+                category__slug__in={entry.get('category', 'public-facilities') for entry in entries},
                 slug__in={entry['subcategory'] for entry in entries},
             )
         }
@@ -27,7 +27,7 @@ class Command(BaseCommand):
                 raise ValueError(f'Coordinates outside bounds: {name}')
             _, is_new = Place.objects.update_or_create(
                 title_ar=name,
-                sub_category=subcategories[entry['subcategory']],
+                sub_category=subcategories[entry.get('category', 'public-facilities'), entry['subcategory']],
                 defaults={'latitude': lat, 'longitude': lon, 'sector': ''},
             )
             created += is_new
