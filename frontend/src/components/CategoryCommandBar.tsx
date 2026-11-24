@@ -46,6 +46,15 @@ export default function CategoryCommandBar({
   const activeCategory = categories.find(
     (c) => c.slug === selectedCategorySlug,
   );
+  const activeSubcategory = activeCategory?.subcategories?.find(
+    (sub) => sub.slug === selectedSubcategorySlug,
+  );
+  const parentSlug = activeSubcategory?.parent_slug ||
+    (activeCategory?.subcategories?.some((sub) => sub.parent_slug === selectedSubcategorySlug)
+      ? selectedSubcategorySlug : null);
+  const visibleSubcategories = activeCategory?.subcategories?.filter(
+    (sub) => parentSlug ? sub.parent_slug === parentSlug : !sub.parent_slug,
+  );
   const subScrollRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +102,7 @@ export default function CategoryCommandBar({
               type="button"
               onClick={() => {
                 if (selectedSubcategorySlug) {
-                  onSelectSubcategory(null);
+                  onSelectSubcategory(activeSubcategory?.parent_slug || null);
                 } else {
                   onSelectCategory(null);
                 }
@@ -165,23 +174,23 @@ export default function CategoryCommandBar({
               ) : (
                 <button
                   type="button"
-                  onClick={() => onSelectSubcategory(null)}
-                  aria-pressed={selectedSubcategorySlug === null}
+                  onClick={() => onSelectSubcategory(parentSlug)}
+                  aria-pressed={selectedSubcategorySlug === parentSlug}
                   className={`shrink-0 h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                    selectedSubcategorySlug === null
+                    selectedSubcategorySlug === parentSlug
                       ? "bg-[#064239] text-[#f7f4ed] ring-2 ring-[#c8a76a] scale-[1.02]"
                       : "bg-[#fdfbf7]/95 dark:bg-zinc-900/95 text-zinc-700 dark:text-zinc-200 border border-[#064239]/15 hover:bg-[#edebe0] hover:text-[#064239]"
                   }`}
                 >
-                  {selectedSubcategorySlug === null && (
+                  {selectedSubcategorySlug === parentSlug && (
                     <Check className="w-3.5 h-3.5 text-[#ecc988]" />
                   )}
-                  <span>الكل</span>
+                  <span>{parentSlug ? "كل فروع الجامعة" : "الكل"}</span>
                 </button>
               )}
               {(!selectedSubcategorySlug || uniqueSectors.length === 0) &&
-                activeCategory.subcategories &&
-                activeCategory.subcategories.map((sub: SubcategoryInfo) => {
+                visibleSubcategories &&
+                visibleSubcategories.map((sub: SubcategoryInfo) => {
                   const isSubSelected = selectedSubcategorySlug === sub.slug;
                   return (
                     <button
@@ -189,7 +198,7 @@ export default function CategoryCommandBar({
                       type="button"
                       aria-pressed={isSubSelected}
                       onClick={() =>
-                        onSelectSubcategory(isSubSelected ? null : sub.slug)
+                        onSelectSubcategory(isSubSelected ? sub.parent_slug || null : sub.slug)
                       }
                       className={`shrink-0 h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
                         isSubSelected

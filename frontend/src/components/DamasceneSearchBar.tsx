@@ -348,11 +348,7 @@ return (
   <div
     ref={searchContainerRef}
     dir="rtl"
-    className={`relative z-30 flex shrink-0 items-center rounded-full border border-[#c8a76a]/60 bg-[#fdfbf7] shadow-sm transition-all duration-300 ease-in-out ${
-      isSearchOpen
-        ? 'w-64 sm:w-80 rounded-2xl'
-        : 'w-10 sm:w-11'
-    }`}
+    className="relative z-30 flex w-10 sm:w-11 shrink-0 items-center"
     onKeyDown={(event) => {
       if (event.key === 'Escape') {
         setIsSearchOpen(false);
@@ -378,7 +374,7 @@ return (
           setIsOpen(query.trim().length >= 2);
         }
       }}
-      className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full text-[#064239] transition-colors hover:bg-[#064239] hover:text-white cursor-pointer"
+      className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-[#c8a76a]/60 bg-[#fdfbf7] text-[#064239] shadow-sm transition-colors hover:bg-[#064239] hover:text-white cursor-pointer"
     >
       {isSearchOpen ? (
         <X className="w-5 h-5" />
@@ -387,9 +383,9 @@ return (
       )}
     </button>
 
-    {/* حقل البحث داخل نفس الكارد */}
+    {/* يظهر حقل البحث أسفل الشريط حتى تبقى مساحة التصنيفات ثابتة */}
     <div
-      className={`flex min-w-0 flex-1 items-center overflow-hidden transition-opacity duration-200 ${
+      className={`absolute top-full left-0 mt-2 flex h-12 w-[min(36rem,calc(100vw-2rem))] items-center overflow-hidden rounded-2xl border border-[#064239]/20 bg-[#fdfbf7] shadow-xl transition-opacity duration-200 ${
         isSearchOpen
           ? 'opacity-100'
           : 'opacity-0 pointer-events-none'
@@ -404,7 +400,7 @@ return (
         onFocus={() => {
           if (results.length > 0) setIsOpen(true);
         }}
-        placeholder="ابحث هنا..."
+        placeholder={placeholder || "ابحث هنا..."}
         aria-label="البحث في بلديات وأحياء وشوارع ومعالم دمشق"
         className="w-full min-w-0 bg-transparent px-2 py-2.5 text-sm font-semibold text-[#064239] placeholder:text-zinc-500/80 focus:outline-none"
         dir="rtl"
@@ -439,7 +435,7 @@ return (
     {isSearchOpen && isOpen && results.length > 0 && (
       <div
         id="map-search-panel"
-        className="absolute top-full right-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-2xl border border-[#064239]/15 overflow-hidden max-h-[60vh] sm:max-h-[70vh] flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
+        className="absolute top-[calc(100%+3.5rem)] left-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-2xl border border-[#064239]/15 overflow-hidden max-h-[60vh] sm:max-h-[70vh] flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
         dir="rtl"
       >
         {/* تبويبات تصفية النتائج */}
@@ -580,7 +576,7 @@ return (
       !loading && (
         <div
           id="map-search-panel"
-          className="absolute top-full right-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-xl border border-[#064239]/15 p-4 text-center text-sm font-medium text-zinc-500"
+          className="absolute top-[calc(100%+3.5rem)] left-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-xl border border-[#064239]/15 p-4 text-center text-sm font-medium text-zinc-500"
           dir="rtl"
         >
           لم يتم العثور على نتائج تطابق &quot;{query}&quot; في دمشق

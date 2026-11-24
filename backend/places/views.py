@@ -146,7 +146,7 @@ def list_categories(request):
     """
     إرجاع قائمة تصنيفات الطبقات (مشافي، مدارس، مباني حكومية...) مع عدد الأماكن
     """
-    categories = Category.objects.filter(is_active=True).prefetch_related('subcategories')
+    categories = Category.objects.filter(is_active=True).prefetch_related('subcategories__parent')
     data = []
     for cat in categories:
         data.append({
@@ -164,6 +164,7 @@ def list_categories(request):
                     "name_ar": sub.name_ar,
                     "name_en": sub.name_en,
                     "icon": sub.effective_icon,
+                    "parent_slug": sub.parent.slug if sub.parent_id else None,
                 }
                 for sub in cat.subcategories.all()
             ]

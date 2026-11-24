@@ -139,6 +139,7 @@ class SubCategory(models.Model):
         related_name='subcategories',
         verbose_name="التصنيف الرئيسي"
     )
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     name_ar = models.CharField(max_length=100, verbose_name="اسم التصنيف الفرعي")
     name_en = models.CharField(max_length=100, blank=True)
     slug = models.SlugField(max_length=100)

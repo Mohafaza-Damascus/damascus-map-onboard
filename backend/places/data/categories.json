@@ -162,14 +162,44 @@
         "name_en": "Schools"
       },
       {
+        "slug": "damascus-university",
+        "name_ar": "جامعة دمشق",
+        "name_en": "Damascus University"
+      },
+      {
         "slug": "colleges",
         "name_ar": "كليات",
-        "name_en": "Colleges"
+        "name_en": "Colleges",
+        "parent": "damascus-university"
+      },
+      {
+        "slug": "university-institutes",
+        "name_ar": "معاهد",
+        "name_en": "Institutes",
+        "parent": "damascus-university"
+      },
+      {
+        "slug": "security-sciences-college",
+        "name_ar": "كلية العلوم الأمنية",
+        "name_en": "College of Security Sciences",
+        "parent": "damascus-university"
+      },
+      {
+        "slug": "defense-sciences-college",
+        "name_ar": "كلية العلوم الدفاعية",
+        "name_en": "College of Defense Sciences",
+        "parent": "damascus-university"
+      },
+      {
+        "slug": "virtual-university-access-centers",
+        "name_ar": "مراكز نفاذ الجامعة الافتراضية",
+        "name_en": "Virtual University Access Centers",
+        "parent": "damascus-university"
       },
       {
         "slug": "institutes",
-        "name_ar": "معاهد",
-        "name_en": "Institutes"
+        "name_ar": "معاهد الشؤون الاجتماعية",
+        "name_en": "Social Affairs Institutes"
       },
       {
         "slug": "kindegartens",

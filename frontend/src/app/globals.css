@@ -259,10 +259,6 @@ body {
   align-items: center;
 }
 
-.map-header-search>div {
-  height: 100%;
-}
-
 .map-header-search input {
   color: #064239;
 }

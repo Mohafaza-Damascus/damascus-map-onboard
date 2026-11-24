@@ -24,6 +24,7 @@ import {
 export interface SubcategoryInfo {
   id: number;
   slug: string;
+  parent_slug?: string | null;
   name_ar: string;
   name_en?: string;
   icon?: string;

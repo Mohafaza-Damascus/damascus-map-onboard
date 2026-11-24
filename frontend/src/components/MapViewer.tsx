@@ -80,6 +80,13 @@ const DAMASCUS_OVERVIEW_CENTER: [number, number] = [36.273, 33.512];
 const DAMASCUS_OVERVIEW_ZOOM = 11.2;
 const THREE_D_VIDEO_URL = "https://youtu.be/LDo_ec-INyQ?si=NyE6a-28GdyKHIvJ";
 
+function subcategorySlugs(categories: CategoryInfo[], slug: string | null): string[] {
+  if (!slug) return [];
+  return [slug, ...categories.flatMap((category) =>
+    category.subcategories?.filter((sub) => sub.parent_slug === slug).map((sub) => sub.slug) || [],
+  )];
+}
+
 export default function MapViewer({
   initialCenter = DEFAULT_CENTER,
   initialZoom = DEFAULT_ZOOM,
@@ -104,6 +111,8 @@ export default function MapViewer({
   // 1. بيانات الطبقات والتصنيفات (المعالم مخفية افتراضياً عند الإقلاع الأول)
   const [categories, setCategories] =
     useState<CategoryInfo[]>(PLATFORM_CATEGORIES);
+  const categoriesRef = useRef(categories);
+  categoriesRef.current = categories;
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const selectedCategoriesRef = useRef<string[]>([]);
   selectedCategoriesRef.current = selectedCategories;
@@ -663,8 +672,9 @@ export default function MapViewer({
             Math.min(90, bounds.getNorth()),
           ].join(","),
         });
-        if (selectedSubcategoryRef.current)
-          query.set("subcategories", selectedSubcategoryRef.current);
+        const selectedSlugs = subcategorySlugs(categoriesRef.current, selectedSubcategoryRef.current);
+        if (selectedSlugs.length)
+          query.set("subcategories", selectedSlugs.join(","));
         const res = await fetch(`${getApiBaseUrl()}/places/geojson/?${query}`, {
           signal: controller.signal,
           cache: "no-store",
@@ -709,11 +719,11 @@ export default function MapViewer({
             const filter = ["==", ["get", "sector"], selectedSectorRef.current];
             map.setFilter("places-poi-pins", filter);
             map.setFilter("places-poi-labels", filter);
-          } else if (selectedSubcategoryRef.current) {
+          } else if (selectedSlugs.length) {
             const filter = [
-              "==",
+              "in",
               ["get", "sub_category_slug"],
-              selectedSubcategoryRef.current,
+              ["literal", selectedSlugs],
             ];
             map.setFilter("places-poi-pins", filter);
             map.setFilter("places-poi-labels", filter);
@@ -1966,7 +1976,8 @@ export default function MapViewer({
     }
 
     if (selectedSubcategory) {
-      const filter = ["==", ["get", "sub_category_slug"], selectedSubcategory];
+      const filter = ["in", ["get", "sub_category_slug"],
+        ["literal", subcategorySlugs(categories, selectedSubcategory)]];
       map.setFilter("places-poi-pins", filter);
       if (map.getLayer("places-poi-labels"))
         map.setFilter("places-poi-labels", filter);
@@ -1975,7 +1986,7 @@ export default function MapViewer({
       if (map.getLayer("places-poi-labels"))
         map.setFilter("places-poi-labels", null);
     }
-  }, [selectedSubcategory, selectedSector]);
+  }, [selectedSubcategory, selectedSector, categories]);
 
   useEffect(() => {
     if (!selectedSubcategory) {
