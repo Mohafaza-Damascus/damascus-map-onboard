@@ -58,6 +58,10 @@ it('opens the real form from the home choice and saves without login or an invit
   render(<App />)
   fireEvent.click(screen.getByRole('button', { name: 'إضافة مكان' }))
   fireEvent.change(await screen.findByLabelText('الاسم بالعربية'), { target: { value: 'عيادة الاختبار' } })
+  expect((screen.getByLabelText('القطاع') as HTMLInputElement).value).toBe('')
+  expect(screen.queryByText(/Public: عام/)).toBeNull()
+  fireEvent.change(screen.getByLabelText('حالة السبت'), { target: { value: 'hours' } })
+  fireEvent.change(screen.getByLabelText('وقت فتح السبت'), { target: { value: '08:00' } })
   fireEvent.change(screen.getByLabelText('الفئة الرئيسية'), { target: { value: '1' } })
   fireEvent.change(screen.getByLabelText('الفئة الفرعية'), { target: { value: '2' } })
   fireEvent.change(screen.getByLabelText('خط العرض'), { target: { value: '33.51' } })
@@ -66,6 +70,8 @@ it('opens the real form from the home choice and saves without login or an invit
   expect(await screen.findByText('تم حفظ المكان بنجاح')).toBeTruthy()
   expect(screen.queryByText(/تسجيل الدخول/)).toBeNull()
   expect(request).toHaveBeenCalledTimes(3)
+  const payload = JSON.parse(request.mock.calls.find(([, init]) => init.method === 'POST')![1].body as string)
+  expect(payload).toMatchObject({ sector: '', opening_hours: { السبت: '08:00–17:00' } })
 })
 
 it('edits an existing place from the form without employee login', async () => {
