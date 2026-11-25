@@ -18,7 +18,7 @@ class Command(BaseCommand):
         education = Category.objects.get(slug='education')
         institutes, _ = SubCategory.objects.get_or_create(
             category=education, slug='institutes',
-            defaults={'name_ar': 'معاهد', 'name_en': 'Institutes'},
+            defaults={'name_ar': 'معاهد الشؤون الاجتماعية', 'name_en': 'Social Affairs Institutes'},
         )
         created = 0
 

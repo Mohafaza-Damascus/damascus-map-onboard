@@ -25,6 +25,6 @@ export function createSubmissionApi() {
       const body = new FormData(); body.append('file', file); body.append('is_cover', String(is_cover))
       return request<PlaceInput['media'][number]>('media/', { method: 'POST', body })
     })),
-    save: (input: PlaceInput, id?: number) => request<Place>(id ? `places/${id}/` : '', { method: id ? 'PATCH' : 'POST', body: JSON.stringify({ ...input, is_verified: false, is_visible: id ? input.is_visible : false }) }),
+    save: (input: Partial<PlaceInput>, id?: number) => request<Place>(id ? `places/${id}/` : '', { method: id ? 'PATCH' : 'POST', body: JSON.stringify(id && !Object.keys(input).length ? {} : { ...input, is_verified: false, is_visible: id ? input.is_visible : false }) }),
   }
 }

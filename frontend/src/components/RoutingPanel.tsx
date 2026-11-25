@@ -145,10 +145,11 @@ export default function RoutingPanel({
         onClick={handleClose}
       />
 
-      <div
-        className="fixed inset-x-0 bottom-0 sm:inset-x-auto sm:top-24 sm:bottom-6 sm:left-4 z-50 w-full sm:w-96 max-h-[75dvh] sm:max-h-[calc(100vh-7.5rem)] bg-[#fdfbf7] dark:bg-zinc-900 shadow-2xl rounded-t-3xl sm:rounded-3xl border-t sm:border border-[#064239]/20 dark:border-white/10 flex flex-col animate-in slide-in-from-bottom sm:slide-in-from-left sm:fade-in duration-300 pb-safe overflow-hidden"
-        dir="rtl"
-      >
+<div
+  className="routing-panel shrink-0"
+  dir="rtl"
+>
+
         {/* مقبض سحب بصري للهواتف المحمولة */}
         <div className="sm:hidden absolute top-2 inset-x-0 flex justify-center z-20 pointer-events-none">
           <div className="w-12 h-1.5 rounded-full bg-white/70 shadow-xs" />
@@ -243,7 +244,7 @@ export default function RoutingPanel({
         </div>
 
         {/* تفاصيل المسار والخطوات */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="routing-panel-content p-4 space-y-2">
           {error ? (
             <p
               role="alert"
@@ -409,7 +410,7 @@ export default function RoutingPanel({
         <button
           type="button"
           onClick={handleClose}
-          className="mx-4 mb-4 rounded-xl border border-[#064239]/20 px-3 py-2 text-xs font-bold text-[#064239] dark:text-emerald-300"
+          className="mx-4 mb-3 mt-2 shrink-0 rounded-xl border border-[#064239]/20 px-3 py-2 text-xs font-bold text-[#064239] dark:text-emerald-300"
         >
           إلغاء المسار
         </button>

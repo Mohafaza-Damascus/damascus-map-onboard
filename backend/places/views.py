@@ -86,6 +86,9 @@ def list_place_sectors(request):
     if not subcategory:
         return JsonResponse({"results": []})
 
+    if SubCategory.objects.filter(parent__slug=subcategory, category__slug=category).exists():
+        return JsonResponse({"results": []})
+
     categories_without_sectors = {
         'public-facilities', 'communications', 'economy', 'religious',
         'culture', 'tourism', 'damascus-governorate', 'government',
@@ -146,7 +149,7 @@ def list_categories(request):
     """
     إرجاع قائمة تصنيفات الطبقات (مشافي، مدارس، مباني حكومية...) مع عدد الأماكن
     """
-    categories = Category.objects.filter(is_active=True).prefetch_related('subcategories')
+    categories = Category.objects.filter(is_active=True).prefetch_related('subcategories__parent')
     data = []
     for cat in categories:
         data.append({
@@ -164,6 +167,7 @@ def list_categories(request):
                     "name_ar": sub.name_ar,
                     "name_en": sub.name_en,
                     "icon": sub.effective_icon,
+                    "parent_slug": sub.parent.slug if sub.parent_id else None,
                 }
                 for sub in cat.subcategories.all()
             ]

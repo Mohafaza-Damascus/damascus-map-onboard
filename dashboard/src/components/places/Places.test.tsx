@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import PlacesFilters from './PlacesFilters'
 import PlacesMap from './PlacesMap'
@@ -93,7 +93,8 @@ describe('places workflows', () => {
 
   it('opens an optional section when its added required row is empty', () => {
     const save = vi.fn()
-    render(<PlaceForm metadata={metadata} initial={{ ...place, communication_info: [{ type: 'phone', value: '' }] }} savePlace={save} onSaved={vi.fn()} />)
+    render(<PlaceForm metadata={metadata} initial={place} savePlace={save} onSaved={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'إضافة وسيلة تواصل' }))
     fireEvent.click(screen.getByRole('button', { name: 'حفظ المكان' }))
     const contact = screen.getByLabelText('قيمة التواصل')
     expect(contact.closest('details')?.open).toBe(true)
@@ -136,6 +137,28 @@ describe('places workflows', () => {
     expect((screen.getByRole('button', { name: 'جارٍ الحفظ…' }) as HTMLButtonElement).disabled).toBe(true)
     expect(screen.getByText('جارٍ إرسال البيانات، يرجى الانتظار…')).toBeTruthy()
     await act(async () => resolve(place))
+    expect(saved).toHaveBeenCalledWith(place)
+  })
+
+  it('saves an edited place with an empty sector and no sector hint', async () => {
+    const save = vi.fn().mockResolvedValue({ ...place, sector: '' })
+    render(<PlaceForm metadata={metadata} initial={place} savePlace={save} onSaved={vi.fn()} />)
+    const sector = screen.getByLabelText('القطاع') as HTMLInputElement
+    expect(sector.required).toBe(false)
+    fireEvent.change(sector, { target: { value: '' } })
+    fireEvent.blur(sector)
+    expect(screen.queryByText(/Public: عام/)).toBeNull()
+    expect(screen.queryByText('هذا الحقل مطلوب.')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'حفظ المكان' }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith(expect.objectContaining({ sector: '' }), place.id))
+  })
+
+  it('saves unchanged legacy data without revalidating or resending it', async () => {
+    const save = vi.fn().mockResolvedValue(place)
+    const saved = vi.fn()
+    render(<PlaceForm metadata={metadata} initial={{ ...place, communication_info: [{ type: 'phone', value: '011-1234567' }] }} savePlace={save} onSaved={saved} />)
+    fireEvent.click(screen.getByRole('button', { name: 'حفظ المكان' }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({}, place.id))
     expect(saved).toHaveBeenCalledWith(place)
   })
 

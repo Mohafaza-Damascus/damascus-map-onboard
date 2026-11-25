@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react'
 import PlaceForm from '../components/places/PlaceForm'
 import { createSubmissionApi, type SubmissionMetadata } from '../services/placeSubmissionApi'
 import type { Place, PlacePage } from '../types/places'
+import { API_URL } from '../config'
+
+type CategoryBranch = { id: number; slug: string; parent_slug: string | null }
 
 const api = createSubmissionApi()
 
 export default function PlaceSubmissionPage() {
   const [metadata, setMetadata] = useState<SubmissionMetadata>()
+  const [hierarchy, setHierarchy] = useState<CategoryBranch[]>()
   const [mode, setMode] = useState<'add' | 'edit'>('add')
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<PlacePage>()
@@ -21,7 +25,16 @@ export default function PlaceSubmissionPage() {
   }, [])
   useEffect(() => {
     const controller = new AbortController()
-    api.metadata(controller.signal).then(setMetadata).catch(e => { if (e.name !== 'AbortError') setError(e.message) })
+    Promise.all([
+      api.metadata(controller.signal),
+      fetch(`${API_URL}/categories/`, { signal: controller.signal, cache: 'no-store' }).then(res => {
+        if (!res.ok) throw new Error('تعذر تحميل تسلسل التصنيفات.')
+        return res.json() as Promise<{ results: { subcategories: CategoryBranch[] }[] }>
+      }),
+    ]).then(([data, categories]) => {
+      setHierarchy(categories.results.flatMap(category => category.subcategories))
+      setMetadata(data)
+    }).catch(e => { if (e.name !== 'AbortError') setError(e.message) })
     return () => controller.abort()
   }, [attempt])
   useEffect(() => {
@@ -54,7 +67,7 @@ export default function PlaceSubmissionPage() {
     </section>}
     {metadata && !error && !saved && (mode === 'add' || selected) && <>
       {mode === 'add' && <p className="submission-policy">{metadata.auto_publish ? 'سيُنشر المكان على الخريطة بعد الحفظ.' : 'سيُراجع المكان قبل نشره على الخريطة.'}</p>}
-      <PlaceForm key={selected?.id ?? 'new'} metadata={{ ...metadata, csrf_token: '' }} initial={selected ?? undefined} submission savePlace={api.save} uploadMedia={api.uploadMedia} onCancel={selected ? () => setSelected(null) : undefined} onSaved={setSaved} />
+      <PlaceForm key={selected?.id ?? 'new'} metadata={{ ...metadata, csrf_token: '' }} hierarchy={mode === 'add' ? hierarchy : undefined} initial={selected ?? undefined} submission savePlace={api.save} uploadMedia={api.uploadMedia} onCancel={selected ? () => setSelected(null) : undefined} onSaved={setSaved} />
     </>}
   </main>
 }

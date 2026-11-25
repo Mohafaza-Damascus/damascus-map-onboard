@@ -20,6 +20,12 @@ class Command(BaseCommand):
             kind: SubCategory.objects.get(category__slug='healthcare', slug=slug)
             for kind, slug in slugs.items()
         }
+        center_branches = {
+            sector: SubCategory.objects.get(category__slug='healthcare', slug=slug)
+            for sector, slug in (
+                ('Public', 'public-health-centers'), ('private', 'private-health-centers'),
+            )
+        }
         created = missing = outside = 0
 
         for entry in entries:
@@ -33,19 +39,23 @@ class Command(BaseCommand):
                 outside += 1
                 continue
             ownership = entry['ownership']
+            sector = '' if entry['type'] == 'بنك دم' else {'حكومي': 'Public', 'خاص': 'private'}.get(ownership, '')
+            subcategory = categories[entry['type']]
+            if entry['type'] == 'مركز':
+                subcategory = center_branches.get(sector, subcategory)
+                sector = ''
             description = entry['ministry']
             if ownership.startswith('منظمة'):
                 description = '\n'.join(part for part in (description, f'الملكية: {ownership}') if part)
             place, is_new = Place.objects.update_or_create(
                 title_ar=entry['name'],
                 defaults={
-                    'sub_category': categories[entry['type']],
+                    'sub_category': subcategory,
                     'latitude': lat, 'longitude': lon,
                     'description': description,
                     'opening_hours': {'hours': entry['operational_status']}
                     if entry['operational_status'] else {},
-                    'sector': '' if entry['type'] == 'بنك دم'
-                    else {'حكومي': 'Public', 'خاص': 'private'}.get(ownership, ''),
+                    'sector': sector,
                 },
             )
             save_contact_values(place, phone=entry['phone'])

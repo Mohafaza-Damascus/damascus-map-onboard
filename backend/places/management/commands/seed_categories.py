@@ -38,6 +38,10 @@ class Command(BaseCommand):
                 )
                 subcategories_created += created
                 subcategory_count += 1
+            for sub in entry['subcategories']:
+                parent_slug = sub.get('parent')
+                parent = SubCategory.objects.get(category=category, slug=parent_slug) if parent_slug else None
+                SubCategory.objects.filter(category=category, slug=sub['slug']).update(parent=parent)
 
         legacy_subcategories = (
             ('culture', 'cultural-center', 'culture', 'cultural-centers'),
