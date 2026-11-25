@@ -348,7 +348,7 @@ return (
   <div
     ref={searchContainerRef}
     dir="rtl"
-    className="relative z-30 flex w-10 sm:w-11 shrink-0 items-center"
+    className="relative z-50 flex items-center shrink-0"
     onKeyDown={(event) => {
       if (event.key === 'Escape') {
         setIsSearchOpen(false);
@@ -357,85 +357,80 @@ return (
       }
     }}
   >
-    {/* زر البحث: يتحول إلى زر إغلاق عند فتح البحث */}
-    <button
-      ref={searchButtonRef}
-      type="button"
-      aria-label={isSearchOpen ? 'إغلاق البحث' : 'بحث'}
-      title="بحث"
-      aria-expanded={isSearchOpen}
-      aria-controls="map-search-panel"
-      onClick={() => {
-        if (isSearchOpen) {
-          setIsSearchOpen(false);
-          setIsOpen(false);
-        } else {
-          setIsSearchOpen(true);
-          setIsOpen(query.trim().length >= 2);
-        }
-      }}
-      className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full border border-[#c8a76a]/60 bg-[#fdfbf7] text-[#064239] shadow-sm transition-colors hover:bg-[#064239] hover:text-white cursor-pointer"
-    >
-      {isSearchOpen ? (
-        <X className="w-5 h-5" />
-      ) : (
-        <Search className="w-5 h-5" />
-      )}
-    </button>
 
-    {/* يظهر حقل البحث أسفل الشريط حتى تبقى مساحة التصنيفات ثابتة */}
-    <div
-      className={`absolute top-full left-0 mt-2 flex h-12 w-[min(36rem,calc(100vw-2rem))] items-center overflow-hidden rounded-2xl border border-[#064239]/20 bg-[#fdfbf7] shadow-xl transition-opacity duration-200 ${
-        isSearchOpen
-          ? 'opacity-100'
-          : 'opacity-0 pointer-events-none'
-      }`}
-    >
-      <input
-        ref={inputRef}
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (results.length > 0) setIsOpen(true);
-        }}
-        placeholder={placeholder || "ابحث هنا..."}
-        aria-label="البحث في بلديات وأحياء وشوارع ومعالم دمشق"
-        className="w-full min-w-0 bg-transparent px-2 py-2.5 text-sm font-semibold text-[#064239] placeholder:text-zinc-500/80 focus:outline-none"
-        dir="rtl"
-        tabIndex={isSearchOpen ? 0 : -1}
-      />
+{/* Expandable Navbar Search */}
+<div
+  className={`
+    relative flex items-center h-10 sm:h-11
+    rounded-full overflow-hidden
+    transition-all duration-300 ease-in-out
+    ${
+      isSearchOpen
+        ? 'w-45 bg-white dark:bg-zinc-900 border border-[#064239] shadow-lg'
+        : 'w-10 sm:w-11 bg-[#fdfbf7] border border-[#064239]'
+    }
+  `}
+>
+  {/* Search / Close Button */}
+  <button
+    ref={searchButtonRef}
+    type="button"
+    onClick={() => {
+      if (isSearchOpen) {
+        setIsSearchOpen(false);
+        setIsOpen(false);
+      } else {
+        setIsSearchOpen(true);
+        setIsOpen(query.trim().length >= 2);
+      }
+    }}
+    aria-label={isSearchOpen ? 'إغلاق البحث' : 'بحث'}
+    aria-expanded={isSearchOpen}
+    className="absolute right-0 z-10 flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full text-[#064239] dark:text-emerald-400 cursor-pointer"
+  >
+    {isSearchOpen
+      ? <X className="w-5 h-5" />
+      : <Search className="w-5 h-5" />
+    }
+  </button>
 
-      {loading && (
-        <Loader2 className="w-4 h-4 ml-2 shrink-0 animate-spin text-[#064239]" />
-      )}
+  {/* Search Input */}
+  <input
+    ref={inputRef}
+    type="text"
+    value={query}
+    onChange={(e) => setQuery(e.target.value)}
+    onKeyDown={handleKeyDown}
+    onFocus={() => {
+      if (results.length > 0) setIsOpen(true);
+    }}
+    placeholder={placeholder || 'ابحث في دمشق'}
+    aria-label="البحث في دمشق"
+    dir="rtl"
+    tabIndex={isSearchOpen ? 0 : -1}
+    className={`
+      h-full w-full min-w-0 bg-[#fdfbf7]
+      pr-12 pl-10 text-sm font-semibold
+      text-[#064239] dark:text-zinc-100
+      placeholder:text-zinc-400
+      focus:outline-none
+      transition-opacity duration-200
+      ${isSearchOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+    `}
+  />
 
-      {query && (
-        <button
-          type="button"
-          onClick={() => {
-            setQuery('');
-            setResults([]);
-            setGrouped({});
-            setCounts({ all: 0 });
-            setActiveTab('all');
-            setSelectedIndex(-1);
-            setIsOpen(false);
-          }}
-          aria-label="مسح نص البحث"
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 cursor-pointer transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      )}
-    </div>
+  {/* Loading */}
+  {loading && isSearchOpen && (
+    <Loader2 className="absolute left-9 w-4 h-4 animate-spin text-[#064239]" />
+  )}
+
+</div>
 
     {/* قائمة النتائج المنسدلة */}
     {isSearchOpen && isOpen && results.length > 0 && (
       <div
         id="map-search-panel"
-        className="absolute top-[calc(100%+3.5rem)] left-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-2xl border border-[#064239]/15 overflow-hidden max-h-[60vh] sm:max-h-[70vh] flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
+        className="absolute top-full left-0 mt-3 w-[min(360px,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-2xl border border-[#064239]/15 overflow-hidden max-h-[65vh] flex flex-col animate-in fade-in slide-in-from-top-2 duration-200"
         dir="rtl"
       >
         {/* تبويبات تصفية النتائج */}
@@ -525,7 +520,7 @@ return (
         </div>
 
         {/* عناصر النتائج */}
-        <div className="p-1.5 sm:p-2 space-y-1 overflow-y-auto overscroll-contain flex-1">
+        <div className="search-results-scroll sm:p-2 space-y-1 overflow-y-auto overscroll-contain flex-1">
           {filteredResults.map((item, idx) => {
             const isSelected = selectedIndex === idx;
 
@@ -569,19 +564,34 @@ return (
     )}
 
     {/* حالة عدم وجود نتائج */}
-    {isSearchOpen &&
-      isOpen &&
-      query.trim().length >= 2 &&
-      results.length === 0 &&
-      !loading && (
-        <div
-          id="map-search-panel"
-          className="absolute top-[calc(100%+3.5rem)] left-0 mt-2 w-[min(36rem,calc(100vw-2rem))] bg-[#fdfbf7] dark:bg-zinc-900 rounded-2xl shadow-xl border border-[#064239]/15 p-4 text-center text-sm font-medium text-zinc-500"
-          dir="rtl"
-        >
-          لم يتم العثور على نتائج تطابق &quot;{query}&quot; في دمشق
-        </div>
-      )}
+    
+{isSearchOpen &&
+  isOpen &&
+  query.trim().length >= 2 &&
+  results.length === 0 &&
+  !loading && (
+    <div
+      id="map-search-panel"
+      dir="rtl"
+      className="
+        absolute top-12 left-0 mt-3
+        w-[min(280px,calc(100vw-2rem))]
+        bg-[#fdfbf7] dark:bg-zinc-900
+        rounded-2xl shadow-2xl
+        border border-[#064239]/15
+        px-4 py-3
+        text-right
+        text-sm font-medium
+        leading-7
+        text-[#064239] dark:text-zinc-200
+        whitespace-normal break-words
+        animate-in fade-in slide-in-from-top-2 duration-200
+      "
+    >
+      لم يتم العثور على نتائج تطابق &quot;{query}&quot; في دمشق
+    </div>
+  )}
+
   </div>
 );
 

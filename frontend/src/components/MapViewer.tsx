@@ -2759,7 +2759,7 @@ export default function MapViewer({
             placeholder={
               selectedCategories[0]
                 ? `ابحث داخل ${categories.find((c) => c.slug === selectedCategories[0])?.name_ar || "الفئة المحددة"}...`
-                : "ابحث عن مشفى، مدرسة، دائرة، حي، أو خط باص..."
+                : "ابحث في دمشق"
             }
           />
         </div>
@@ -2776,7 +2776,7 @@ export default function MapViewer({
       </a>
 
       <div
-        className="map-header-theme z-[51] flex items-center gap-1 rounded-2xl border border-[#064239]/10 bg-[#fdfbf7]/90 p-1 shadow-lg"
+        className="map-header-theme z-40 flex items-center gap-1 rounded-2xl border border-[#064239]/10 bg-[#fdfbf7]/90 p-1 shadow-lg"
         dir="rtl"
         role="group"
         aria-label="عرض الخريطة وهويتها"

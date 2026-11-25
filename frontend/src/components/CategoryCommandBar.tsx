@@ -226,7 +226,7 @@ export default function CategoryCommandBar({
               mainScrollRef.current.scrollLeft += e.deltaY;
             }
           }}
-          className="w-full h-full flex items-center overflow-x-auto no-scrollbar scroll-smooth px-1 overscroll-x-contain touch-pan-x"
+          className=""
           dir="rtl"
         >
           <div className="flex items-center gap-1.5 sm:gap-2 px-1 sm:px-2 min-w-max justify-start sm:justify-center sm:mx-auto py-0.5">
@@ -237,7 +237,7 @@ export default function CategoryCommandBar({
                   key={cat.slug}
                   type="button"
                   onClick={() => onSelectCategory(cat.slug)}
-                  className="shrink-0 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl  hover:bg-[#064239] hover:text-[#ecc988] text-[#064239] text-[#064239] border border-[#064239] hover:border-white transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 group whitespace-nowrap"
+                  className="shrink-0 h-9 sm:h-10 px-1.5 sm:px-2 rounded-xl  hover:bg-[#064239] hover:text-[#ecc988] text-[#064239] text-[#064239] border border-[#064239] hover:border-white transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95 group whitespace-nowrap  w-auto"
                   title={cat.name_ar}
                 >
                   <span className="group-hover:scale-110 transition-transform">
