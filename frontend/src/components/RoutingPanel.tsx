@@ -294,27 +294,27 @@ export default function RoutingPanel({
                   <div className="p-1">
                     {mode === "transit" ? (
                       <>
-                        <div className="flex items-center justify-center gap-1 text-emerald-600 mb-0.5">
-                          <Coins className="w-4 h-4" />
-                        </div>
-                        <span className="text-base font-black text-emerald-700">
-                          {routeResult.cost_syp}
-                        </span>
-                        <span className="text-[10px] text-zinc-500 block font-bold">
-                          ل.س (تعرفة)
-                        </span>
-                      </>
+                       <div className="flex items-center justify-center gap-1 text-[#064239] mb-0.5">
+  <Coins className="w-4 h-4" />
+</div>
+<span className="text-base font-black text-[#064239] font-black">
+  {routeResult.cost_syp}
+</span>
+<span className="text-[10px] text-zinc-500 block font-bold">
+  ل.س (تعرفة)
+</span>
+</>
                     ) : (
                       <>
-                        <div className="flex items-center justify-center gap-1 text-[#3a6962] mb-0.5">
-                          <Car className="w-4 h-4" />
-                        </div>
-                        <span className="text-base font-black text-[#3a6962]">
-                          مسار طرق
-                        </span>
-                        <span className="text-[10px] text-zinc-500 block font-bold">
-                          وقت تقديري
-                        </span>
+                       <div className="flex items-center justify-center gap-1 text-[#064239] mb-0.5">
+  <Car className="w-4 h-4" />
+</div>
+<span className="text-base font-black text-[#064239]">
+  مسار طرق
+</span>
+<span className="text-[10px] text-zinc-500 block font-bold">
+  وقت تقديري
+</span>
                       </>
                     )}
                   </div>

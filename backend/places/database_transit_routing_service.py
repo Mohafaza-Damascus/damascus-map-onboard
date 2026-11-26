@@ -11,6 +11,7 @@ from .database_routing_service import DatabaseRoutingError, calculate_database_r
 from .models import BusRoute
 from .routing_cache import cached_routing
 from .transit_routing_service import _cumulative, _distance, _feature, _walk_leg
+from .location_labels import describe_location
 
 
 def _walk(start, end):
@@ -287,7 +288,10 @@ def calculate_database_transit_route(start, end):
                          'duration_seconds': round(seconds, 1),
                          'line_name': route.bus.name, 'bus_route_id': route.id,
                          'direction': route.direction, 'boarding': coords[0],
-                         'alighting': coords[-1], 'boarding_safety_verified': False,
+                         'alighting': coords[-1],
+                         'boarding_label': describe_location(coords[0][0], coords[0][1]),
+                         'alighting_label': describe_location(coords[-1][0], coords[-1][1]),
+                         'boarding_safety_verified': False,
                          'geojson': _feature({'type': 'LineString', 'coordinates': coords},
                                              'bus', route.bus.color or '#D99432')})
     buses = [leg for leg in legs if leg['mode'] == 'bus']
@@ -298,11 +302,14 @@ def calculate_database_transit_route(start, end):
     for index, leg in enumerate(legs):
         if leg['mode'] == 'bus':
             label = 'بدّل إلى' if any(item['mode'] == 'bus' for item in legs[:index]) else 'اركب'
-            instruction = f"{label} خط {leg['line_name']}، ثم انزل عند نقطة النزول المقترحة"
+            alighting_label = leg.get('alighting_label') or 'النقطة المقترحة'
+            instruction = f"{label} خط {leg['line_name']}، ثم انزل عند نقطة النزول المقترحة في {alighting_label}"
         elif index == len(legs) - 1:
             instruction = 'تابع مشيًا إلى الوجهة'
         else:
-            instruction = 'امشِ إلى نقطة الصعود المقترحة'
+            next_bus = next((item for item in legs[index + 1:] if item['mode'] == 'bus'), None)
+            boarding_label = next_bus.get('boarding_label') if next_bus else None
+            instruction = f"امشِ إلى نقطة الصعود المقترحة في {boarding_label}" if boarding_label else 'امشِ إلى نقطة الصعود المقترحة'
         steps.append({'instruction': instruction, 'icon': leg['mode'],
                       'duration_mins': round(leg['duration_seconds'] / 60)})
     overhead = len(buses) * settings.TRANSIT_TRANSFER_PENALTY_SECONDS
@@ -314,6 +321,8 @@ def calculate_database_transit_route(start, end):
               'walking_distance_m': walking_m, 'walking_duration_s': walking_s,
               'bus_distance_m': bus_m, 'bus_duration_s': bus_s,
               'boarding': buses[0]['boarding'], 'alighting': buses[-1]['alighting'],
+              'boarding_label': buses[0].get('boarding_label'),
+              'alighting_label': buses[-1].get('alighting_label'),
               'boarding_safety_verified': False, 'waiting_time_minutes': None,
               'planning_buffer_minutes': overhead / 60, 'duration_estimated': True,
               'transfers_count': len(buses) - 1, 'steps': steps,

@@ -2306,6 +2306,16 @@ export default function MapViewer({
   const handleApplyRouteGeoJSON = (geojson: any, result?: RouteResult) => {
     const map = mapInstanceRef.current;
     if (!map || !map.isStyleLoaded()) return;
+    // إزالة الإطارات البيضاء القديمة للمسارات نهائياً
+[
+  "routing-path-casing",
+  "routing-walk-casing",
+  "routing-bus-casing",
+].forEach((id) => {
+  if (map.getLayer(id)) {
+    map.removeLayer(id);
+  }
+});
     const routeData = result?.route_legs?.length
       ? {
           type: "FeatureCollection",
@@ -2350,51 +2360,6 @@ export default function MapViewer({
         "line-join": "round" as const,
       };
 
-      // طبقة السيارة: أبيض -> ذهبي -> أخضر دمشق.
-      map.addLayer({
-        id: "routing-path-casing",
-        type: "line",
-        source: "routing-path-source",
-        filter: carFilter,
-        layout: roundedLineLayout,
-        paint: {
-          "line-color": "#FFFFFF",
-          "line-width": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            11,
-            9,
-            14,
-            12,
-            17,
-            15,
-          ],
-          "line-opacity": 1,
-        },
-      });
-      map.addLayer({
-        id: "routing-path-accent",
-        type: "line",
-        source: "routing-path-source",
-        filter: carFilter,
-        layout: roundedLineLayout,
-        paint: {
-          "line-color": "#ECC988", // gold-light
-          "line-width": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            11,
-            7,
-            14,
-            9.5,
-            17,
-            12,
-          ],
-          "line-opacity": 1,
-        },
-      });
       map.addLayer({
         id: "routing-path-line",
         type: "line",
@@ -2402,7 +2367,7 @@ export default function MapViewer({
         filter: carFilter,
         layout: roundedLineLayout,
         paint: {
-          "line-color": "#064239", // green
+          "line-color": "#3A6962", // green
           "line-width": [
             "interpolate",
             ["linear"],
@@ -2414,7 +2379,7 @@ export default function MapViewer({
             17,
             9,
           ],
-          "line-opacity": 1,
+          "line-opacity": 0.75,
         },
       });
 
@@ -2462,7 +2427,7 @@ export default function MapViewer({
             8,
           ],
           "line-dasharray": [2, 2],
-          "line-opacity": 1,
+          "line-opacity": 0.75,
         },
       });
 
@@ -2508,22 +2473,22 @@ export default function MapViewer({
             17,
             10.5,
           ],
-          "line-opacity": 1,
+          "line-opacity": 0.78,
         },
       });
     }
 
-    [
-      "routing-path-casing",
-      "routing-path-accent",
-      "routing-path-line",
-      "routing-walk-casing",
-      "routing-walk-line",
-      "routing-bus-casing",
-      "routing-bus-line",
-    ].forEach((id) => {
-      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "visible");
-    });
+ [
+  "routing-path-line",
+  "routing-walk-casing",
+  "routing-walk-line",
+  "routing-bus-casing",
+  "routing-bus-line",
+].forEach((id) => {
+  if (map?.getLayer(id)) {
+    map.setLayoutProperty(id, "visibility", "visible");
+  }
+});
 
     routingMarkersRef.current.forEach((marker) => marker.remove());
     routingMarkersRef.current = [];
@@ -2622,8 +2587,6 @@ export default function MapViewer({
   const handleClearRoute = () => {
     const map = mapInstanceRef.current;
     [
-      "routing-path-casing",
-      "routing-path-accent",
       "routing-path-line",
       "routing-walk-casing",
       "routing-walk-line",
