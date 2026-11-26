@@ -163,9 +163,6 @@ def calculate_database_transit_route(start, end):
     if start == end:
         raise DatabaseRoutingError('empty_route', 'نقطتا البداية والنهاية متطابقتان')
     direct = _walk(start, end)
-    if direct and (direct['distance_m'] <= 100 or
-                   direct['duration_s'] <= settings.TRANSIT_TRANSFER_PENALTY_SECONDS):
-        return _walking_result(direct)
     routes = _routes()
     candidates = _boarding_candidates(routes)
     if not candidates:
@@ -227,9 +224,6 @@ def calculate_database_transit_route(start, end):
         cost, _, state = heapq.heappop(queue)
         if cost != distances[state]:
             continue
-        # All arc costs are nonnegative: no continuation can beat direct walking.
-        if direct and cost >= direct['duration_s']:
-            break
         node, just_rode, has_bus = state
         if node == target:
             if has_bus:
@@ -258,10 +252,9 @@ def calculate_database_transit_route(start, end):
                 previous[next_state] = (state, kind, data)
                 counter += 1
                 heapq.heappush(queue, (new_cost, counter, next_state))
-    # Compare with the complete journey cost, including every boarding buffer.
-    if direct and (finish is None or direct['duration_s'] <= distances[finish]):
-        return _walking_result(direct)
     if finish is None:
+        if direct:
+            return _walking_result(direct)
         raise DatabaseRoutingError('no_route', 'لا يتوفر مسار مواصلات مناسب بين النقطتين')
     path, state = [], finish
     while state != first_state:
