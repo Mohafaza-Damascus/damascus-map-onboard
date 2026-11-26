@@ -11,6 +11,8 @@ export interface RouteLeg {
   direction?: 'outbound' | 'inbound';
   boarding?: number[];
   alighting?: number[];
+  boarding_label?: string;
+  alighting_label?: string;
 }
 
 export interface RouteResult {
@@ -39,6 +41,8 @@ export interface RouteResult {
   waiting_time_minutes?: number | null;
   boarding?: number[];
   alighting?: number[];
+  boarding_label?: string;
+  alighting_label?: string;
   boarding_safety_verified?: boolean;
   start?: { longitude: number; latitude: number };
   end?: { longitude: number; latitude: number };

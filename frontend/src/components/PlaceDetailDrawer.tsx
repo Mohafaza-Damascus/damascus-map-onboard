@@ -227,25 +227,25 @@ export default function PlaceDetailDrawer({
   const getCategoryIcon = (slug: string) => {
     switch (slug) {
       case "healthcare":
-        return <Hospital className="w-4 h-4 text-white" />;
+        return <Hospital className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "education":
-        return <GraduationCap className="w-4 h-4 text-white" />;
+        return <GraduationCap className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "government":
-        return <Landmark className="w-4 h-4 text-white" />;
+        return <Landmark className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "religious":
-        return <Moon className="w-4 h-4 text-white" />;
+        return <Moon className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "tourism":
-        return <Sparkles className="w-4 h-4 text-white" />;
+        return <Sparkles className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "public-services":
-        return <Wrench className="w-4 h-4 text-white" />;
+        return <Wrench className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "security":
-        return <Shield className="w-4 h-4 text-white" />;
+        return <Shield className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "economy":
-        return <Coins className="w-4 h-4 text-white" />;
+        return <Coins className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       case "transportation":
-        return <Bus className="w-4 h-4 text-white" />;
+        return <Bus className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
       default:
-        return <Building2 className="w-4 h-4 text-white" />;
+        return <Building2 className="w-4 h-4 text-[#064239] drop-shadow-[0_0_2px_white]" />;
     }
   };
   const activeMedia =
@@ -349,58 +349,13 @@ export default function PlaceDetailDrawer({
         aria-label={`تفاصيل ${place.title}`}
         dir="rtl"
       >
+      
+        
         <div
-          className={`absolute top-0 inset-x-0 h-12 bg-[#fdfbf7]/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-[#064239]/15 dark:border-white/10 flex items-center justify-between px-3 z-30 transition-all duration-200 ${
-            isScrolled
-              ? "translate-y-0 opacity-100"
-              : "-translate-y-full opacity-0 pointer-events-none"
-          }`}
+          onClick={() => setLightboxIndex(activeMediaIndex)}
+          className="relative h-32 sm:h-50 w-full overflow-hidden shrink-0 bg-zinc-800 cursor-pointer group"
+          title="انقر لفتح الصورة أو الفيديو بحجم كامل"
         >
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
-              style={{ backgroundColor: "#064239" }}
-            >
-              {getCategoryIcon(place.category.slug)}
-            </div>
-            <span className="font-black text-xs text-[#064239] dark:text-zinc-100 truncate">
-              {place.title}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleShare(e);
-              }}
-              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 text-zinc-700 dark:text-zinc-200 flex items-center justify-center transition-all cursor-pointer"
-              title="مشاركة الرابط"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClose();
-              }}
-              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 text-zinc-700 dark:text-zinc-200 flex items-center justify-center transition-all cursor-pointer"
-              title="إغلاق"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-        <div
-          onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 100)}
-          className="map-place-card-content"
-        >
-          <div
-            onClick={() => setLightboxIndex(activeMediaIndex)}
-           className="relative h-32 sm:h-50 w-full overflow-hidden shrink-0 bg-zinc-800 cursor-pointer group"
-            title="انقر لفتح الصورة أو الفيديو بحجم كامل"
-          >
             {activeMedia?.type === "video" ? (
               (() => {
                 const embed = getEmbedVideoUrl(activeMedia.url);
@@ -507,7 +462,10 @@ export default function PlaceDetailDrawer({
               ))}
             </div>
           )}
-          <div className="p-3.5 sm:p-4 space-y-3">
+          <div
+  onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 100)}
+  className="map-place-card-content p-3.5 sm:p-4 space-y-3"
+>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -759,7 +717,7 @@ export default function PlaceDetailDrawer({
               </button>
             </div>
           </div>
-        </div>
+  
         <div className="pointer-events-none absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-[#fdfbf7] dark:from-zinc-900 to-transparent z-20" />
         {copied && (
           <div className="absolute bottom-3 inset-x-4 p-2 rounded-xl bg-[#064239] text-[#f7f4ed] text-xs font-bold text-center z-30 shadow-lg animate-in fade-in slide-in-from-bottom-2">

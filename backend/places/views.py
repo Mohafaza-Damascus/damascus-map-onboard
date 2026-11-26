@@ -760,12 +760,22 @@ def calculate_route(request):
             return JsonResponse({'error': 'خدمة التوجيه غير متاحة', 'code': 'engine_unavailable'}, status=503)
         steps = []
         if journey['recommended_mode'] == 'transit' and 'steps' not in journey:
+            boarding_label = journey.get('boarding_label')
+            alighting_label = journey.get('alighting_label')
+            boarding_instruction = (
+                f'امشِ إلى نقطة الصعود المقترحة في {boarding_label}'
+                if boarding_label else 'امشِ إلى نقطة الصعود المقترحة'
+            )
+            alighting_instruction = (
+                f'انزل عند نقطة النزول المقترحة في {alighting_label} وتابع مشياً إلى الوجهة'
+                if alighting_label else 'انزل عند النقطة المقترحة وتابع مشياً إلى الوجهة'
+            )
             steps = [
-                {'instruction': 'امشِ إلى نقطة الصعود المقترحة', 'icon': 'walk',
+                {'instruction': boarding_instruction, 'icon': 'walk',
                  'duration_mins': round(journey['legs'][0]['duration_seconds'] / 60)},
                 {'instruction': f"اركب {journey['line_name']} باتجاه المسار المحدد", 'icon': 'bus',
                  'duration_mins': round(journey['bus_duration_s'] / 60)},
-                {'instruction': 'انزل عند النقطة المقترحة وتابع مشياً إلى الوجهة', 'icon': 'walk',
+                {'instruction': alighting_instruction, 'icon': 'walk',
                  'duration_mins': round(journey['legs'][2]['duration_seconds'] / 60)},
             ]
         steps = journey.get('steps', steps)
@@ -781,6 +791,7 @@ def calculate_route(request):
             'bus_duration_minutes': round(journey.get('bus_duration_s', 0) / 60),
             'waiting_time_minutes': journey.get('waiting_time_minutes'),
             'boarding': journey.get('boarding'), 'alighting': journey.get('alighting'),
+            'boarding_label': journey.get('boarding_label'), 'alighting_label': journey.get('alighting_label'),
             'boarding_safety_verified': journey.get('boarding_safety_verified'),
             'planning_buffer_minutes': journey.get('planning_buffer_minutes'),
             'duration_estimated': journey.get('duration_estimated'),

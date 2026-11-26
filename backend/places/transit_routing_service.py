@@ -7,6 +7,7 @@ from django.conf import settings
 
 from .models import BusRoute
 from .routing_service import RoutingError, calculate_walking_route
+from .location_labels import describe_location
 
 
 EARTH_RADIUS = 6371000
@@ -211,6 +212,20 @@ def calculate_transit_route(start, end):
             {'mode': 'bus', 'distance_m': round(ride, 1), 'duration_seconds': round(bus_seconds, 1),
              'geojson': _feature({'type': 'LineString', 'coordinates': bus_coords}, 'bus', '#D99432')},
             _walk_leg(egress)]
+    boarding_label = describe_location(board['coordinate'][0], board['coordinate'][1])
+    alighting_label = describe_location(alight['coordinate'][0], alight['coordinate'][1])
+    legs[1]['boarding'] = board['coordinate']
+    legs[1]['alighting'] = alight['coordinate']
+    legs[1]['boarding_label'] = boarding_label
+    legs[1]['alighting_label'] = alighting_label
+    steps = [
+        {'instruction': f'امشِ إلى نقطة الصعود المقترحة في {boarding_label}', 'icon': 'walk',
+         'duration_mins': round(access['duration_s'] / 60)},
+        {'instruction': f"اركب {route.bus.name} باتجاه المسار المحدد، ثم انزل عند نقطة النزول المقترحة في {alighting_label}", 'icon': 'bus',
+         'duration_mins': round(bus_seconds / 60)},
+        {'instruction': f'تابع مشياً إلى الوجهة من {alighting_label}', 'icon': 'walk',
+         'duration_mins': round(egress['duration_s'] / 60)},
+    ]
     duration = access['duration_s'] + bus_seconds + egress['duration_s']
     _diagnostic(route.id, 'selected', direction=route.direction,
                 walking_metres=round(walking_distance), riding_metres=round(ride))
@@ -221,8 +236,9 @@ def calculate_transit_route(start, end):
             'walking_duration_s': access['duration_s'] + egress['duration_s'],
             'bus_distance_m': ride, 'bus_duration_s': bus_seconds,
             'boarding': board['coordinate'], 'alighting': alight['coordinate'],
+            'boarding_label': boarding_label, 'alighting_label': alighting_label,
             'boarding_safety_verified': False, 'waiting_time_minutes': None,
-            'legs': legs, 'route_geojson': legs[1]['geojson'],
+            'steps': steps, 'legs': legs, 'route_geojson': legs[1]['geojson'],
             'alternatives': [{'mode': 'walk', 'summary': 'المشي المباشر',
                               'distance_m': direct['distance_m'], 'duration_s': direct['duration_s'],
                               'legs': [direct_leg]}]}
